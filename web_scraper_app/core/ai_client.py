@@ -74,9 +74,9 @@ class GeminiAIClient:
                 HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
             }
             
-            # Initialize the model
+            # Initialize the model - using the correct model name for current API
             self.model = genai.GenerativeModel(
-                'gemini-pro',
+                'gemini-2.5-flash',
                 safety_settings=safety_settings
             )
             self.logger.info("Gemini AI model initialized successfully")
@@ -560,7 +560,7 @@ Best regards"""
             dict: Model information and status
         """
         return {
-            "model_name": "gemini-pro",
+            "model_name": "gemini-2.5-flash",
             "api_key_configured": bool(self.api_key),
             "model_initialized": self.model is not None,
             "connection_status": "ready" if self.model else "not_initialized",
