@@ -112,10 +112,10 @@ class ApplicationController(QObject):
             if api_key:
                 self.ai_client = GeminiAIClient(api_key)
                 
-            # Initialize email sender if SMTP config is available
-            smtp_config = self.config_manager.get_smtp_config()
-            if smtp_config:
-                self.email_sender = EmailSender(smtp_config, self.db_manager)
+            # Email sender initialization disabled - SMTP functionality was removed
+            # smtp_config = self.config_manager.get_smtp_config()
+            # if smtp_config:
+            #     self.email_sender = EmailSender(smtp_config, self.db_manager)
                 
             # Initialize web scraper
             self.web_scraper = WebScraper()
@@ -217,16 +217,9 @@ class ApplicationController(QObject):
             return False
     
     def update_smtp_config(self, smtp_config: SMTPConfig) -> bool:
-        """Update SMTP configuration"""
-        try:
-            self.config_manager.set_smtp_config(smtp_config)
-            self.email_sender = EmailSender(smtp_config)
-            self.config_updated.emit("smtp")
-            self.status_update.emit("SMTP configuration updated")
-            return True
-        except Exception as e:
-            self.error_occurred.emit(f"Failed to update SMTP configuration: {str(e)}")
-            return False
+        """SMTP configuration disabled - SMTP functionality was removed"""
+        self.status_update.emit("SMTP functionality has been removed - only Gemini AI is needed")
+        return True  # Return True to avoid errors, but SMTP is not actually configured
     
     def test_gemini_connection(self) -> bool:
         """Test Gemini AI connection"""
@@ -249,39 +242,21 @@ class ApplicationController(QObject):
             return False
     
     def test_smtp_connection(self) -> bool:
-        """Test SMTP connection"""
-        if not self.email_sender:
-            self.error_occurred.emit("SMTP client not configured")
-            return False
-            
-        try:
-            result = self.email_sender.test_smtp_connection()
-            if result:
-                self.status_update.emit("SMTP connection successful")
-                self.connection_status_changed.emit(True)
-            else:
-                self.error_occurred.emit("SMTP connection failed")
-                self.connection_status_changed.emit(False)
-            return result
-        except Exception as e:
-            self.error_occurred.emit(f"SMTP connection test failed: {str(e)}")
-            self.connection_status_changed.emit(False)
-            return False
+        """SMTP connection testing disabled - SMTP functionality was removed"""
+        self.status_update.emit("SMTP functionality has been removed - only Gemini AI is needed")
+        return True  # Return True to avoid errors, but SMTP is not actually tested
     
     def check_connections(self):
-        """Periodic connection health check"""
+        """Periodic connection health check - only checking Gemini AI since SMTP was removed"""
         try:
             gemini_ok = False
             if self.ai_client:
                 result = self.ai_client.test_connection()
                 gemini_ok = bool(result) if isinstance(result, bool) else False
             
-            smtp_ok = False
-            if self.email_sender:
-                result = self.email_sender.test_smtp_connection()
-                smtp_ok = bool(result) if isinstance(result, bool) else False
-            
-            self.connection_status_changed.emit(gemini_ok and smtp_ok)
+            # SMTP testing disabled since SMTP configuration was removed
+            # Only emit Gemini status since that's all we need
+            self.connection_status_changed.emit(gemini_ok)
         except Exception as e:
             self.logger.error(f"Error in connection check: {e}")
             self.connection_status_changed.emit(False)
