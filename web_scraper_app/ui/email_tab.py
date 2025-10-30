@@ -78,8 +78,8 @@ class EmailTab(QWidget):
         right_panel = self.create_right_panel()
         main_splitter.addWidget(right_panel)
         
-        # Set splitter proportions
-        main_splitter.setSizes([400, 600])
+        # Set splitter proportions - give more space to the left panel (Generated Emails)
+        main_splitter.setSizes([600, 500])
         
         # Status and progress section
         status_layout = self.create_status_section()
@@ -126,17 +126,22 @@ class EmailTab(QWidget):
             "Select", "Website", "Subject", "Status"
         ])
         
-        # Configure table
+        # Configure table with better column sizing
         header = self.emails_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
-        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Interactive)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)
         
-        self.emails_table.setColumnWidth(0, 60)
-        self.emails_table.setColumnWidth(3, 80)
+        # Set better column widths for readability
+        self.emails_table.setColumnWidth(0, 70)   # Select checkbox
+        self.emails_table.setColumnWidth(1, 200)  # Website - wider for better readability
+        self.emails_table.setColumnWidth(3, 100)  # Status - slightly wider
         self.emails_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.emails_table.itemSelectionChanged.connect(self.on_email_selected)
+        
+        # Set minimum height for better readability
+        self.emails_table.setMinimumHeight(300)
         
         list_layout.addWidget(self.emails_table)
         
