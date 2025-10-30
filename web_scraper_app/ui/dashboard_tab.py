@@ -119,15 +119,16 @@ class ScrapingResultsWidget(QTableWidget):
         self.setup_table()
         
     def setup_table(self):
-        """Setup the results table widget"""
-        self.setColumnCount(3)
-        self.setHorizontalHeaderLabels(["Email", "Source Website", "Extracted At"])
+        """Setup the results table widget with email editing capability"""
+        self.setColumnCount(4)  # Added Actions column
+        self.setHorizontalHeaderLabels(["Email", "Source Website", "Extracted At", "Actions"])
         
         # Configure table appearance
         header = self.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
         
         # Configure selection behavior
         self.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
@@ -136,14 +137,20 @@ class ScrapingResultsWidget(QTableWidget):
         # Set minimum height
         self.setMinimumHeight(250)
         
+        # Connect item changed signal for email editing
+        self.itemChanged.connect(self.on_email_edited)
+        
     def add_email_result(self, email: str, source_website: str, extracted_at: str):
-        """Add an email result to the table"""
+        """Add an email result to the table with editing capability"""
         row = self.rowCount()
         self.insertRow(row)
         
-        # Email column
+        # Email column - EDITABLE for manual correction
         email_item = QTableWidgetItem(email)
-        email_item.setFlags(email_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+        email_item.setFlags(email_item.flags() | Qt.ItemFlag.ItemIsEditable)
+        email_item.setToolTip("Double-click to edit this email address")
+        # Store original email for comparison
+        email_item.setData(Qt.ItemDataRole.UserRole, email)
         self.setItem(row, 0, email_item)
         
         # Source website column
@@ -156,8 +163,68 @@ class ScrapingResultsWidget(QTableWidget):
         time_item.setFlags(time_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
         self.setItem(row, 2, time_item)
         
+        # Actions column - Reset button
+        reset_btn = QPushButton("Reset")
+        reset_btn.setProperty("class", "secondary-button")
+        reset_btn.setToolTip("Reset email to original extracted value")
+        reset_btn.clicked.connect(lambda: self.reset_email(row))
+        self.setCellWidget(row, 3, reset_btn)
+        
         # Scroll to the new item
         self.scrollToItem(email_item)
+    
+    def on_email_edited(self, item):
+        """Handle email editing"""
+        if item.column() == 0:  # Email column
+            new_email = item.text().strip()
+            original_email = item.data(Qt.ItemDataRole.UserRole)
+            
+            # Validate the new email
+            if self.is_valid_email(new_email):
+                # Email is valid, update styling to show it's been edited
+                if new_email != original_email:
+                    item.setBackground(Qt.GlobalColor.lightGray)
+                    item.setToolTip(f"Edited from: {original_email}\nDouble-click to edit further")
+                else:
+                    item.setBackground(Qt.GlobalColor.white)
+                    item.setToolTip("Double-click to edit this email address")
+            else:
+                # Invalid email, revert to original
+                from PyQt6.QtWidgets import QMessageBox
+                QMessageBox.warning(self, "Invalid Email", 
+                                  f"'{new_email}' is not a valid email address.\nReverting to original.")
+                item.setText(original_email)
+    
+    def reset_email(self, row):
+        """Reset email to original value"""
+        email_item = self.item(row, 0)
+        if email_item:
+            original_email = email_item.data(Qt.ItemDataRole.UserRole)
+            email_item.setText(original_email)
+            email_item.setBackground(Qt.GlobalColor.white)
+            email_item.setToolTip("Double-click to edit this email address")
+    
+    def is_valid_email(self, email: str) -> bool:
+        """Validate email address format"""
+        import re
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        return bool(re.match(pattern, email))
+    
+    def get_all_emails(self) -> List[tuple]:
+        """Get all emails with their metadata"""
+        emails = []
+        for row in range(self.rowCount()):
+            email_item = self.item(row, 0)
+            website_item = self.item(row, 1)
+            time_item = self.item(row, 2)
+            
+            if email_item and website_item and time_item:
+                emails.append((
+                    email_item.text(),
+                    website_item.text(),
+                    time_item.text()
+                ))
+        return emails
     
     def clear_results(self):
         """Clear all results from the table"""
