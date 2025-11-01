@@ -286,7 +286,7 @@ class WebScraper:
         
     def extract_emails(self, text: str) -> List[str]:
         """
-        Extract email addresses from text using regex pattern.
+        Extract email addresses from text using improved regex pattern.
         
         Args:
             text: Text content to search for emails
@@ -296,20 +296,136 @@ class WebScraper:
         """
         if not text:
             return []
-            
-        # Find all email matches
-        matches = re.findall(self.EMAIL_PATTERN, text, re.IGNORECASE)
         
-        # Remove duplicates and filter out common false positives
+        # Improved email extraction with multiple strategies
         unique_emails = set()
-        for email in matches:
+        
+        # Strategy 1: Use word boundaries to avoid concatenated text
+        boundary_pattern = r'\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b'
+        boundary_matches = re.findall(boundary_pattern, text, re.IGNORECASE)
+        
+        # Strategy 2: Look for emails surrounded by common separators
+        separator_pattern = r'(?:^|[\s\n\r\t,;:<>()[\]{}"\'\|]|&nbsp;|&gt;|&lt;)([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?=[\s\n\r\t,;:<>()[\]{}"\'\|]|&nbsp;|&gt;|&lt;|$)'
+        separator_matches = re.findall(separator_pattern, text, re.IGNORECASE)
+        
+        # Strategy 3: Original pattern as fallback
+        original_matches = re.findall(self.EMAIL_PATTERN, text, re.IGNORECASE)
+        
+        # Combine all matches
+        all_matches = boundary_matches + separator_matches + original_matches
+        
+        # Process and validate all matches
+        for email in all_matches:
             email = email.lower().strip()
-            # Skip common false positives
+            
+            # Clean up any remaining unwanted characters
+            email = self._clean_email_address(email)
+            
+            # Skip if not valid
             if not self._is_valid_email_address(email):
                 continue
+                
             unique_emails.add(email)
             
         return list(unique_emails)
+    
+    def _clean_email_address(self, email: str) -> str:
+        """
+        Clean up extracted email address by removing unwanted characters.
+        
+        Args:
+            email: Raw email address
+            
+        Returns:
+            Cleaned email address
+        """
+        if not email or '@' not in email:
+            return email
+            
+        # Remove common unwanted prefixes that get concatenated
+        unwanted_prefixes = [
+            'contact', 'email', 'mail', 'info', 'support', 'admin', 'sales',
+            'cv', 'resume', 'job', 'career', 'work', 'business', 'company',
+            'cvcontact', 'emailaddress', 'infosupport', 'salesteam'
+        ]
+        
+        # Common unwanted suffixes that get concatenated (like "dribble", "linkedin", etc.)
+        unwanted_suffixes = [
+            'dribble', 'dribbble', 'linkedin', 'twitter', 'facebook', 'instagram',
+            'github', 'behance', 'portfolio', 'website', 'blog', 'social',
+            'profile', 'link', 'follow', 'connect', 'contact', 'more'
+        ]
+        
+        # Sort by length (longest first) to catch longer prefixes/suffixes first
+        unwanted_prefixes.sort(key=len, reverse=True)
+        unwanted_suffixes.sort(key=len, reverse=True)
+        
+        original_email = email.lower()
+        
+        # Check if email starts with unwanted text
+        for prefix in unwanted_prefixes:
+            if original_email.startswith(prefix.lower()):
+                # Remove the prefix and keep the rest
+                potential_email = email[len(prefix):]
+                
+                # Validate that what remains looks like an email
+                if '@' in potential_email and '.' in potential_email.split('@')[1]:
+                    # Check if it starts with a valid email character
+                    if potential_email[0].isalnum():
+                        email = potential_email
+                        break
+        
+        # Check if email ends with unwanted text (like "dribble")
+        # First, find where the email domain ends
+        if '@' in email:
+            parts = email.split('@')
+            if len(parts) == 2:
+                local_part = parts[0]
+                domain_part = parts[1].lower()
+                
+                # Check if domain part has unwanted suffixes
+                for suffix in unwanted_suffixes:
+                    if domain_part.endswith('.' + suffix.lower()) or domain_part.endswith(suffix.lower()):
+                        # Remove the suffix
+                        if domain_part.endswith('.' + suffix.lower()):
+                            domain_part = domain_part[:-len('.' + suffix)]
+                        else:
+                            domain_part = domain_part[:-len(suffix)]
+                        
+                        # Reconstruct email if domain still looks valid
+                        if '.' in domain_part and len(domain_part) > 3:
+                            email = local_part + '@' + domain_part
+                            break
+                
+                # Also check for suffixes directly attached (no dot)
+                for suffix in unwanted_suffixes:
+                    if domain_part.endswith(suffix.lower()) and not domain_part.endswith('.' + suffix.lower()):
+                        # Check if removing suffix leaves a valid domain
+                        potential_domain = domain_part[:-len(suffix)]
+                        if '.' in potential_domain and len(potential_domain) > 3:
+                            # Make sure it ends with a valid TLD
+                            if potential_domain.split('.')[-1].isalpha() and len(potential_domain.split('.')[-1]) >= 2:
+                                email = local_part + '@' + potential_domain
+                                break
+        
+        # Additional cleaning: remove any non-email characters from the beginning
+        at_index = email.find('@')
+        if at_index > 0:
+            # Find the start of the actual email part
+            start_index = 0
+            for i in range(at_index):
+                if email[i].isalnum():
+                    start_index = i
+                    break
+            
+            # Extract from the first alphanumeric character to the end
+            if start_index > 0:
+                email = email[start_index:]
+        
+        # Remove any trailing unwanted characters (but preserve valid email characters)
+        email = re.sub(r'[^a-zA-Z0-9._%+-@]+$', '', email)
+        
+        return email
         
     def _is_valid_email_address(self, email: str) -> bool:
         """
