@@ -186,7 +186,7 @@ class ScrapingResultsWidget(QTableWidget):
                     item.setBackground(Qt.GlobalColor.lightGray)
                     item.setToolTip(f"Edited from: {original_email}\nDouble-click to edit further")
                 else:
-                    item.setBackground(Qt.GlobalColor.white)
+                    item.setBackground(Qt.GlobalColor.transparent)
                     item.setToolTip("Double-click to edit this email address")
             else:
                 # Invalid email, revert to original
@@ -201,7 +201,7 @@ class ScrapingResultsWidget(QTableWidget):
         if email_item:
             original_email = email_item.data(Qt.ItemDataRole.UserRole)
             email_item.setText(original_email)
-            email_item.setBackground(Qt.GlobalColor.white)
+            email_item.setBackground(Qt.GlobalColor.transparent)
             email_item.setToolTip("Double-click to edit this email address")
     
     def is_valid_email(self, email: str) -> bool:
@@ -251,6 +251,9 @@ class DashboardTab(QWidget):
         
     def setup_ui(self):
         """Setup the dashboard UI with proper scrolling"""
+        # Set the tab content class for styling
+        self.setProperty("class", "tab-content")
+        
         # Create main layout
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -264,6 +267,7 @@ class DashboardTab(QWidget):
         
         # Create content widget
         content_widget = QWidget()
+        content_widget.setProperty("class", "tab-content")
         content_layout = QVBoxLayout(content_widget)
         content_layout.setContentsMargins(20, 20, 20, 20)
         content_layout.setSpacing(20)
