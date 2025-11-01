@@ -377,6 +377,14 @@ class ApplicationController(QObject):
         self.email_generation_worker.progress.connect(self.email_generation_progress.emit)
         self.email_generation_worker.finished.connect(self._on_email_generation_finished)
         self.email_generation_worker.error.connect(self._on_email_generation_error)
+    
+    def generate_emails_for_selection(self, websites: List[str], selected_emails: List):
+        """Generate emails for selected emails only"""
+        # Store selected emails for filtering results
+        self.selected_emails_for_generation = selected_emails
+        
+        # Use the regular generation method
+        self.generate_emails(websites)
         
         self.email_generation_thread.start()
         self.status_update.emit(f"Started generating emails for {len(websites)} websites")
@@ -385,9 +393,18 @@ class ApplicationController(QObject):
         """Handle email generation completion"""
         self.is_generating_emails = False
         
+        # Filter emails based on selected emails if selection was made
+        filtered_emails = emails
+        if hasattr(self, 'selected_emails_for_generation') and self.selected_emails_for_generation:
+            selected_websites = set(email.source_website for email in self.selected_emails_for_generation)
+            filtered_emails = [email for email in emails if email.website in selected_websites]
+            
+            # Clear the selection after use
+            delattr(self, 'selected_emails_for_generation')
+        
         # Convert EmailContent objects to dictionaries for UI
         email_dicts = []
-        for email_content in emails:
+        for email_content in filtered_emails:
             email_dict = {
                 'website': email_content.website,
                 'subject': email_content.subject,
@@ -400,7 +417,13 @@ class ApplicationController(QObject):
             email_dicts.append(email_dict)
         
         self.email_generation_finished.emit(email_dicts)
-        self.status_update.emit(f"Email generation completed. Generated {len(emails)} emails")
+        
+        # Update status message
+        if hasattr(self, 'selected_emails_for_generation'):
+            selected_count = len(self.selected_emails_for_generation)
+            self.status_update.emit(f"Email generation completed. Generated {len(filtered_emails)} emails for {selected_count} selected recipients")
+        else:
+            self.status_update.emit(f"Email generation completed. Generated {len(filtered_emails)} emails")
         
         # Clean up thread
         if self.email_generation_thread:
@@ -544,6 +567,22 @@ class ApplicationController(QObject):
             return self.db_manager.get_scraped_emails()
         except Exception as e:
             self.error_occurred.emit(f"Failed to retrieve scraped emails: {str(e)}")
+            return []
+    
+    def get_recent_scraped_emails(self, hours: int = 24) -> List[EmailModel]:
+        """Get recently scraped emails from the last N hours"""
+        try:
+            from datetime import datetime, timedelta
+            cutoff_time = datetime.now() - timedelta(hours=hours)
+            
+            all_emails = self.db_manager.get_scraped_emails()
+            recent_emails = [
+                email for email in all_emails 
+                if email.extracted_at >= cutoff_time
+            ]
+            return recent_emails
+        except Exception as e:
+            self.error_occurred.emit(f"Failed to retrieve recent scraped emails: {str(e)}")
             return []
     
     def get_email_history(self) -> List[SentEmailModel]:
