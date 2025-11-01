@@ -27,6 +27,7 @@ class EmailTab(QWidget):
     
     # Signals for communication with controller
     generate_emails_requested = pyqtSignal(list)  # List of websites
+    generate_emails_for_selection_requested = pyqtSignal(list, list)  # websites, selected_emails
     send_emails_requested = pyqtSignal(list)  # List of email data dicts
     
     def __init__(self):
@@ -36,9 +37,11 @@ class EmailTab(QWidget):
         
         # State variables
         self.scraped_emails = []
+        self.selected_scraped_emails = []  # Store selected emails for generation
         self.generated_emails = []
         self.is_generating = False
         self.is_sending = False
+        self.session_start_time = None  # Track when the current session started
         
         # UI components will be initialized in setup_ui
         self.generate_button = None
@@ -57,6 +60,9 @@ class EmailTab(QWidget):
     
     def setup_ui(self):
         """Initialize the user interface components"""
+        # Set the tab content class for styling
+        self.setProperty("class", "tab-content")
+        
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(10)
         main_layout.setContentsMargins(15, 15, 15, 15)
@@ -87,21 +93,43 @@ class EmailTab(QWidget):
     
     def create_left_panel(self):
         """Create the left panel with email list and generation controls"""
+        # Create scroll area for the left panel
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        
+        # Add custom styling for better integration
+        scroll_area.setStyleSheet("""
+            QScrollArea {
+                border: none;
+                background-color: transparent;
+            }
+            QScrollArea > QWidget > QWidget {
+                background-color: transparent;
+            }
+        """)
+        
+        # Create the actual content widget
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
+        left_layout.setSpacing(15)  # Add more spacing for better readability
         
-        # Generation controls group
+        # Generation controls group with better spacing
         gen_group = QGroupBox("Email Generation")
         gen_layout = QVBoxLayout(gen_group)
+        gen_layout.setSpacing(12)
         
-        # Info label
+        # Info label with better styling
         info_label = QLabel("Generate AI-powered cold emails for scraped websites")
         info_label.setWordWrap(True)
+        info_label.setStyleSheet("color: #555; font-size: 13px; padding: 8px; background-color: #F8F9FA; border-radius: 5px;")
         gen_layout.addWidget(info_label)
         
-        # Generate button
+        # Generate button with better sizing
         self.generate_button = QPushButton("Generate Cold Emails")
-        self.generate_button.setMinimumHeight(40)
+        self.generate_button.setMinimumHeight(45)  # Taller for better visibility
+        self.generate_button.setStyleSheet("font-weight: bold; font-size: 14px;")
         self.generate_button.setToolTip(
             "Generate AI-powered cold emails for scraped websites\n"
             "• Shortcut: Ctrl+G\n"
@@ -115,9 +143,92 @@ class EmailTab(QWidget):
         
         left_layout.addWidget(gen_group)
         
-        # Email list group
+        # Current scraped emails section
+        scraped_group = QGroupBox("Current Scraped Emails")
+        scraped_layout = QVBoxLayout(scraped_group)
+        scraped_layout.setSpacing(10)
+        
+        # Clear data and filter controls
+        controls_layout = QHBoxLayout()
+        
+        # Clear data button
+        self.clear_data_btn = QPushButton("Clear All Cached Data")
+        self.clear_data_btn.setProperty("class", "danger-button")
+        self.clear_data_btn.setToolTip("Clear all cached emails and start fresh")
+        self.clear_data_btn.clicked.connect(self.clear_all_cached_data)
+        controls_layout.addWidget(self.clear_data_btn)
+        
+        controls_layout.addStretch()
+        
+        filter_label = QLabel("Show:")
+        controls_layout.addWidget(filter_label)
+        
+        self.email_filter_combo = QComboBox()
+        self.email_filter_combo.addItems([
+            "Current session only",
+            "Recent (Last 1 hour)", 
+            "Recent (Last 24 hours)",
+            "All emails"
+        ])
+        self.email_filter_combo.setCurrentIndex(0)  # Default to current session only
+        self.email_filter_combo.currentTextChanged.connect(self.filter_scraped_emails)
+        controls_layout.addWidget(self.email_filter_combo)
+        
+        scraped_layout.addLayout(controls_layout)
+        
+        # Info about current emails
+        self.scraped_info_label = QLabel("No emails scraped yet")
+        self.scraped_info_label.setStyleSheet("color: #B0B0B0; font-size: 12px; padding: 5px;")
+        scraped_layout.addWidget(self.scraped_info_label)
+        
+        # Scraped emails table with scroll area
+        scraped_scroll = QScrollArea()
+        scraped_scroll.setWidgetResizable(True)
+        scraped_scroll.setMinimumHeight(200)
+        scraped_scroll.setMaximumHeight(300)
+        
+        self.scraped_emails_table = QTableWidget()
+        self.scraped_emails_table.setColumnCount(3)
+        self.scraped_emails_table.setHorizontalHeaderLabels(["Select", "Email", "Website"])
+        
+        # Configure scraped emails table
+        scraped_header = self.scraped_emails_table.horizontalHeader()
+        scraped_header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
+        scraped_header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        scraped_header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        
+        self.scraped_emails_table.setColumnWidth(0, 60)
+        self.scraped_emails_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.scraped_emails_table.setAlternatingRowColors(True)
+        self.scraped_emails_table.verticalHeader().setDefaultSectionSize(30)
+        
+        scraped_scroll.setWidget(self.scraped_emails_table)
+        scraped_layout.addWidget(scraped_scroll)
+        
+        # Scraped emails controls
+        scraped_controls = QHBoxLayout()
+        
+        self.select_all_scraped_btn = QPushButton("Select All")
+        self.select_all_scraped_btn.clicked.connect(self.select_all_scraped_emails)
+        scraped_controls.addWidget(self.select_all_scraped_btn)
+        
+        self.select_none_scraped_btn = QPushButton("Select None")
+        self.select_none_scraped_btn.clicked.connect(self.select_none_scraped_emails)
+        scraped_controls.addWidget(self.select_none_scraped_btn)
+        
+        self.refresh_scraped_btn = QPushButton("Refresh from Dashboard")
+        self.refresh_scraped_btn.clicked.connect(self.refresh_scraped_emails)
+        scraped_controls.addWidget(self.refresh_scraped_btn)
+        
+        scraped_controls.addStretch()
+        scraped_layout.addLayout(scraped_controls)
+        
+        left_layout.addWidget(scraped_group)
+        
+        # Generated emails list group with better spacing
         list_group = QGroupBox("Generated Emails")
         list_layout = QVBoxLayout(list_group)
+        list_layout.setSpacing(12)
         
         # Email selection table
         self.emails_table = QTableWidget()
@@ -126,54 +237,72 @@ class EmailTab(QWidget):
             "Select", "Website", "Subject", "Status"
         ])
         
-        # Configure table with better column sizing
+        # Configure table with better column sizing and readability
         header = self.emails_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Interactive)
         header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)
         
-        # Set better column widths for readability
-        self.emails_table.setColumnWidth(0, 70)   # Select checkbox
-        self.emails_table.setColumnWidth(1, 200)  # Website - wider for better readability
-        self.emails_table.setColumnWidth(3, 100)  # Status - slightly wider
+        # Set better column widths for improved readability
+        self.emails_table.setColumnWidth(0, 80)   # Select checkbox - slightly wider
+        self.emails_table.setColumnWidth(1, 250)  # Website - much wider for better readability
+        self.emails_table.setColumnWidth(3, 120)  # Status - wider for better text display
+        
+        # Improve table appearance and readability
         self.emails_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self.emails_table.setAlternatingRowColors(True)
+        self.emails_table.setShowGrid(True)
         self.emails_table.itemSelectionChanged.connect(self.on_email_selected)
         
-        # Set minimum height for better readability
-        self.emails_table.setMinimumHeight(300)
+        # Set better height for readability - allow more rows to be visible
+        self.emails_table.setMinimumHeight(350)
+        
+        # Improve row height for better readability
+        self.emails_table.verticalHeader().setDefaultSectionSize(35)
         
         list_layout.addWidget(self.emails_table)
         
-        # Bulk actions
+        # Bulk actions with better spacing
         actions_layout = QHBoxLayout()
+        actions_layout.setSpacing(10)
         
         select_all_btn = QPushButton("Select All")
+        select_all_btn.setMinimumHeight(35)  # Make buttons taller for better usability
         select_all_btn.clicked.connect(self.select_all_emails)
         actions_layout.addWidget(select_all_btn)
         
         select_none_btn = QPushButton("Select None")
+        select_none_btn.setMinimumHeight(35)
         select_none_btn.clicked.connect(self.select_no_emails)
         actions_layout.addWidget(select_none_btn)
         
+        # Add stretch to prevent buttons from stretching too wide
+        actions_layout.addStretch()
+        
         list_layout.addLayout(actions_layout)
         
-        # Sending controls
+        # Sending controls with better spacing
         send_controls_layout = QVBoxLayout()
+        send_controls_layout.setSpacing(10)
         
-        # Recipient count label
+        # Add some spacing before sending controls
+        list_layout.addSpacing(15)
+        
+        # Recipient count label with better styling
         self.recipient_count_label = QLabel("0 recipients selected")
         self.recipient_count_label.setProperty("class", "subtitle")
+        self.recipient_count_label.setStyleSheet("font-weight: bold; color: #1976D2; padding: 5px;")
         send_controls_layout.addWidget(self.recipient_count_label)
         
-        # Send button
+        # Send button with better sizing
         self.send_button = QPushButton("Send Selected Emails")
-        self.send_button.setMinimumHeight(40)
+        self.send_button.setMinimumHeight(45)  # Slightly taller for better visibility
         self.send_button.setToolTip(
             "Send selected emails to scraped recipients\n"
             "• Shortcut: Ctrl+Shift+S\n"
             "• Select emails using checkboxes\n"
-            "• Requires SMTP configuration in Settings"
+            "• Note: SMTP functionality has been simplified"
         )
         self.send_button.setAccessibleName("Send Selected Emails Button")
         self.send_button.setAccessibleDescription("Send all selected emails to their respective recipients")
@@ -181,16 +310,23 @@ class EmailTab(QWidget):
         self.send_button.setEnabled(False)
         send_controls_layout.addWidget(self.send_button)
         
-        # Sending progress details
+        # Sending progress details with better formatting
         self.sending_details_label = QLabel("")
         self.sending_details_label.setWordWrap(True)
+        self.sending_details_label.setStyleSheet("padding: 5px; background-color: #F5F5F5; border-radius: 5px;")
         send_controls_layout.addWidget(self.sending_details_label)
         
         list_layout.addLayout(send_controls_layout)
         
         left_layout.addWidget(list_group)
         
-        return left_widget
+        # Add stretch to push content to top
+        left_layout.addStretch()
+        
+        # Set the content widget to the scroll area
+        scroll_area.setWidget(left_widget)
+        
+        return scroll_area
     
     def create_right_panel(self):
         """Create the right panel with email preview and editing"""
@@ -263,25 +399,48 @@ class EmailTab(QWidget):
         if self.is_generating:
             return
         
-        # Get unique websites from scraped emails
-        websites = list(set([email.source_website for email in self.scraped_emails]))
+        # Get selected scraped emails
+        selected_emails = self.get_selected_scraped_emails()
         
-        if not websites:
+        if not selected_emails:
             QMessageBox.warning(
                 self, 
-                "No Websites", 
-                "No scraped websites found. Please scrape some websites first in the Dashboard tab."
+                "No Emails Selected", 
+                "No emails are selected for generation. Please:\n"
+                "1. Make sure you have scraped some websites in the Dashboard tab\n"
+                "2. Select the emails you want to generate content for\n"
+                "3. Click 'Refresh from Dashboard' if you don't see recent emails"
             )
             return
+        
+        # Get unique websites from selected emails
+        websites = list(set([email.source_website for email in selected_emails]))
+        
+        # Show confirmation dialog
+        reply = QMessageBox.question(
+            self,
+            "Generate Emails",
+            f"Generate AI emails for {len(selected_emails)} selected emails from {len(websites)} websites?\n\n"
+            f"Selected websites:\n" + "\n".join(f"• {website}" for website in websites[:5]) + 
+            (f"\n... and {len(websites) - 5} more" if len(websites) > 5 else ""),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.Yes
+        )
+        
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+        
+        # Store selected emails for use during generation
+        self.selected_scraped_emails = selected_emails
         
         self.is_generating = True
         self.generate_button.setEnabled(False)
         self.progress_bar.setVisible(True)
         self.progress_bar.setRange(0, 0)  # Indeterminate progress
-        self.status_label.setText(f"Generating emails for {len(websites)} websites...")
+        self.status_label.setText(f"Generating emails for {len(websites)} websites with {len(selected_emails)} recipients...")
         
-        # Emit signal to controller
-        self.generate_emails_requested.emit(websites)
+        # Emit signal with both websites and selected emails
+        self.generate_emails_for_selection_requested.emit(websites, selected_emails)
     
     def on_send_emails(self):
         """Handle send emails button click"""
@@ -424,9 +583,10 @@ class EmailTab(QWidget):
             if checkbox and checkbox.isChecked():
                 if row < len(self.generated_emails):
                     email_data = self.generated_emails[row].copy()
-                    # Add recipient emails from scraped data
+                    # Add recipient emails from SELECTED scraped data only
                     website = email_data['website']
-                    recipients = [email.email for email in self.scraped_emails if email.source_website == website]
+                    selected_scraped = self.get_selected_scraped_emails()
+                    recipients = [email.email for email in selected_scraped if email.source_website == website]
                     email_data['recipients'] = recipients
                     selected.append(email_data)
         return selected
@@ -458,8 +618,216 @@ class EmailTab(QWidget):
     
     def update_scraped_emails(self, emails: List[EmailModel]):
         """Update the list of scraped emails"""
+        # Set session start time if this is the first update
+        if self.session_start_time is None:
+            from datetime import datetime
+            self.session_start_time = datetime.now()
+        
         self.scraped_emails = emails
+        self.populate_scraped_emails_table()
         self.status_label.setText(f"Ready - {len(emails)} scraped emails available")
+    
+    def filter_scraped_emails(self):
+        """Filter scraped emails based on selected filter"""
+        self.populate_scraped_emails_table()
+    
+    def populate_scraped_emails_table(self):
+        """Populate the scraped emails table with filtering"""
+        self.scraped_emails_table.setRowCount(0)
+        
+        if not self.scraped_emails:
+            self.scraped_info_label.setText("No emails scraped yet. Go to Dashboard tab to scrape websites.")
+            return
+        
+        # Apply filter
+        filtered_emails = self.apply_email_filter(self.scraped_emails)
+        
+        if not filtered_emails:
+            filter_text = self.email_filter_combo.currentText()
+            self.scraped_info_label.setText(f"No emails match the current filter: {filter_text}")
+            return
+        
+        # Group emails by website for better organization
+        websites = {}
+        for email in filtered_emails:
+            website = email.source_website
+            if website not in websites:
+                websites[website] = []
+            websites[website].append(email.email)
+        
+        filter_text = self.email_filter_combo.currentText()
+        
+        # Populate table
+        row = 0
+        for website, emails in websites.items():
+            for email_addr in emails:
+                self.scraped_emails_table.insertRow(row)
+                
+                # Checkbox for selection
+                checkbox = QCheckBox()
+                checkbox.setChecked(True)  # Default to selected
+                checkbox.stateChanged.connect(self.on_scraped_email_selection_changed)
+                self.scraped_emails_table.setCellWidget(row, 0, checkbox)
+                
+                # Email address
+                email_item = QTableWidgetItem(email_addr)
+                email_item.setFlags(email_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                self.scraped_emails_table.setItem(row, 1, email_item)
+                
+                # Website
+                website_item = QTableWidgetItem(website)
+                website_item.setFlags(website_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                self.scraped_emails_table.setItem(row, 2, website_item)
+                
+                row += 1
+        
+        # Update selection info
+        self.on_scraped_email_selection_changed()
+    
+    def apply_email_filter(self, emails):
+        """Apply the selected filter to the email list"""
+        filter_text = self.email_filter_combo.currentText()
+        
+        if filter_text == "All emails":
+            return emails
+        elif filter_text == "Current session only":
+            # Only show emails from the current application session
+            if self.session_start_time is None:
+                return []
+            return [email for email in emails if email.extracted_at >= self.session_start_time]
+        elif filter_text == "Recent (Last 1 hour)":
+            from datetime import datetime, timedelta
+            cutoff_time = datetime.now() - timedelta(hours=1)
+            return [email for email in emails if email.extracted_at >= cutoff_time]
+        elif filter_text == "Recent (Last 24 hours)":
+            from datetime import datetime, timedelta
+            cutoff_time = datetime.now() - timedelta(hours=24)
+            return [email for email in emails if email.extracted_at >= cutoff_time]
+        else:
+            return emails
+    
+    def on_scraped_email_selection_changed(self):
+        """Handle changes in scraped email selection"""
+        selected_count = 0
+        for row in range(self.scraped_emails_table.rowCount()):
+            checkbox = self.scraped_emails_table.cellWidget(row, 0)
+            if checkbox and checkbox.isChecked():
+                selected_count += 1
+        
+        # Update info label
+        total_count = self.scraped_emails_table.rowCount()
+        filter_text = self.email_filter_combo.currentText()
+        self.scraped_info_label.setText(
+            f"Showing {total_count} emails ({filter_text}) - {selected_count} selected"
+        )
+        
+        # Enable/disable generate button based on selection
+        self.generate_button.setEnabled(selected_count > 0)
+    
+    def select_all_scraped_emails(self):
+        """Select all scraped emails"""
+        for row in range(self.scraped_emails_table.rowCount()):
+            checkbox = self.scraped_emails_table.cellWidget(row, 0)
+            if checkbox:
+                checkbox.setChecked(True)
+        self.on_scraped_email_selection_changed()
+    
+    def select_none_scraped_emails(self):
+        """Deselect all scraped emails"""
+        for row in range(self.scraped_emails_table.rowCount()):
+            checkbox = self.scraped_emails_table.cellWidget(row, 0)
+            if checkbox:
+                checkbox.setChecked(False)
+        self.on_scraped_email_selection_changed()
+    
+    def clear_all_cached_data(self):
+        """Clear all cached email data and start fresh"""
+        reply = QMessageBox.question(
+            self,
+            "Clear All Data",
+            "Are you sure you want to clear ALL cached email data?\n\n"
+            "This will remove:\n"
+            "• All scraped emails\n"
+            "• All sent email history\n"
+            "• All generated emails\n\n"
+            "This action cannot be undone.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+        
+        if reply == QMessageBox.StandardButton.Yes:
+            try:
+                # Clear database using controller
+                main_window = self.window()
+                if hasattr(main_window, 'controller'):
+                    main_window.controller.clear_all_data()
+                
+                # Clear UI state
+                self.scraped_emails = []
+                self.selected_scraped_emails = []
+                self.generated_emails = []
+                self.session_start_time = None
+                
+                # Clear tables
+                self.scraped_emails_table.setRowCount(0)
+                self.emails_table.setRowCount(0)
+                
+                # Clear preview
+                self.subject_edit.clear()
+                self.body_edit.clear()
+                
+                # Update labels
+                self.scraped_info_label.setText("All data cleared. Ready for fresh scraping.")
+                self.recipient_count_label.setText("0 recipients selected")
+                self.status_label.setText("All cached data cleared successfully")
+                
+                # Update button states
+                self.send_button.setEnabled(False)
+                self.generate_button.setEnabled(False)  # Disabled until emails are selected
+                
+                QMessageBox.information(self, "Success", "All cached data cleared successfully!")
+                
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to clear data: {str(e)}")
+    
+    def refresh_scraped_emails(self):
+        """Refresh scraped emails from the controller"""
+        # Get fresh data from the main window's controller
+        main_window = self.window()
+        if hasattr(main_window, 'controller'):
+            fresh_emails = main_window.controller.get_scraped_emails()
+            self.update_scraped_emails(fresh_emails)
+        else:
+            QMessageBox.information(
+                self,
+                "Refresh",
+                "Unable to refresh emails. Please try restarting the application."
+            )
+    
+    def get_selected_scraped_emails(self):
+        """Get only the selected scraped emails for generation"""
+        selected_emails = []
+        
+        # Get currently filtered emails first
+        filtered_emails = self.apply_email_filter(self.scraped_emails)
+        
+        for row in range(self.scraped_emails_table.rowCount()):
+            checkbox = self.scraped_emails_table.cellWidget(row, 0)
+            if checkbox and checkbox.isChecked():
+                email_item = self.scraped_emails_table.item(row, 1)
+                website_item = self.scraped_emails_table.item(row, 2)
+                
+                if email_item and website_item:
+                    # Find the corresponding EmailModel from filtered emails
+                    email_addr = email_item.text()
+                    website = website_item.text()
+                    
+                    for email_model in filtered_emails:
+                        if email_model.email == email_addr and email_model.source_website == website:
+                            selected_emails.append(email_model)
+                            break
+        
+        return selected_emails
     
     def on_emails_generated(self, generated_emails: List[Dict]):
         """Handle successful email generation"""
@@ -607,9 +975,11 @@ class EmailTab(QWidget):
                 if self.emails_table.item(row, 1).text() == website:
                     status_item = QTableWidgetItem(status)
                     if status == 'Sent':
-                        status_item.setBackground(self.colors['success_green'])
+                        from PyQt6.QtGui import QColor
+                        status_item.setBackground(QColor('#4CAF50'))  # success_green
                     elif status == 'Failed':
-                        status_item.setBackground(self.colors['error_red'])
+                        from PyQt6.QtGui import QColor
+                        status_item.setBackground(QColor('#F44336'))  # error_red
                     self.emails_table.setItem(row, 3, status_item)
                     break
 
@@ -676,7 +1046,8 @@ class RecipientSelectionDialog(QDialog):
             # Add website header
             header_item = QListWidgetItem(f"📧 {website} ({len(recipients)} recipients)")
             header_item.setFlags(Qt.ItemFlag.ItemIsEnabled)
-            header_item.setBackground(self.parent().colors['light_green'])
+            from PyQt6.QtGui import QColor
+            header_item.setBackground(QColor('#2D2D2D'))  # Use bg_tertiary color directly
             self.recipients_list.addItem(header_item)
             
             # Add recipients
