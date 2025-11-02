@@ -32,6 +32,9 @@ class HistoryTab(QWidget):
         
     def setup_ui(self):
         """Initialize the history tab UI components."""
+        # Set the tab content class for styling
+        self.setProperty("class", "tab-content")
+        
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(15)
