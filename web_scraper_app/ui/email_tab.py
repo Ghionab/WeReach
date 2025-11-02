@@ -913,6 +913,14 @@ class EmailTab(QWidget):
     
     def on_sending_progress(self, current: int, total: int, current_recipient: str = ""):
         """Handle sending progress updates"""
+        # Ensure current and total are integers
+        try:
+            current = int(current) if not isinstance(current, int) else current
+            total = int(total) if not isinstance(total, int) else total
+        except (ValueError, TypeError):
+            current = 0
+            total = 1
+            
         self.progress_bar.setValue(current)
         self.status_label.setText(f"Sending emails... {current}/{total}")
         
