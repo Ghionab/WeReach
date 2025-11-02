@@ -59,6 +59,9 @@ class SettingsTab(QWidget):
     
     def setup_ui(self):
         """Initialize the settings UI with proper scrolling"""
+        # Set the tab content class for styling
+        self.setProperty("class", "tab-content")
+        
         # Create main layout
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -72,6 +75,7 @@ class SettingsTab(QWidget):
         
         # Create content widget
         content_widget = QWidget()
+        content_widget.setProperty("class", "tab-content")
         content_layout = QVBoxLayout(content_widget)
         content_layout.setContentsMargins(20, 20, 20, 20)
         content_layout.setSpacing(25)
@@ -267,6 +271,11 @@ class SettingsTab(QWidget):
         
         button_layout.addStretch()
         
+        # Gmail setup button
+        self.gmail_setup_btn = QPushButton("Gmail Setup Guide")
+        self.gmail_setup_btn.setProperty("class", "secondary")
+        button_layout.addWidget(self.gmail_setup_btn)
+        
         # Help button
         self.help_btn = QPushButton("Help")
         self.help_btn.setProperty("class", "secondary")
@@ -296,6 +305,7 @@ class SettingsTab(QWidget):
         
         # Action buttons
         self.refresh_btn.clicked.connect(self.load_current_settings)
+        self.gmail_setup_btn.clicked.connect(self.show_gmail_setup)
         self.help_btn.clicked.connect(self.show_help)
     
     def load_current_settings(self):
@@ -784,3 +794,43 @@ class SettingsTab(QWidget):
         """
         
         QMessageBox.information(self, "Settings Help", help_text)
+    
+    def show_gmail_setup(self):
+        """Show Gmail setup instructions"""
+        gmail_help = """
+<h3>Gmail SMTP Setup Guide</h3>
+
+<h4>🔧 Quick Setup Steps:</h4>
+<ol>
+<li><b>Enable 2-Factor Authentication</b> on your Google account</li>
+<li><b>Generate App Password:</b> Google Account → Security → App Passwords → Mail</li>
+<li><b>Configure below:</b>
+   <ul>
+   <li>Server: smtp.gmail.com</li>
+   <li>Port: 587</li>
+   <li>Email: your-email@gmail.com</li>
+   <li>Password: 16-character App Password (not regular password)</li>
+   <li>TLS: Enabled ✓</li>
+   </ul>
+</li>
+<li><b>Test Connection</b> using the button below</li>
+</ol>
+
+<h4>⚠️ Important Notes:</h4>
+<ul>
+<li><b>Never use your regular Gmail password</b> - only App Passwords work</li>
+<li><b>App Password looks like:</b> abcd efgh ijkl mnop (16 characters with spaces)</li>
+<li><b>2FA must be enabled</b> before you can create App Passwords</li>
+</ul>
+
+<h4>❌ Common Errors:</h4>
+<ul>
+<li><b>"Authentication failed"</b> → Using wrong password (use App Password)</li>
+<li><b>"Connection refused"</b> → Check server/port settings</li>
+<li><b>"Too many attempts"</b> → Wait 15 minutes, then try again</li>
+</ul>
+
+<p><b>💡 Tip:</b> Fill in the settings below, then click "Test SMTP" to verify!</p>
+        """
+        
+        QMessageBox.information(self, "Gmail Setup Guide", gmail_help)
