@@ -112,10 +112,10 @@ class ApplicationController(QObject):
             if api_key:
                 self.ai_client = GeminiAIClient(api_key)
                 
-            # Email sender initialization disabled - SMTP functionality was removed
-            # smtp_config = self.config_manager.get_smtp_config()
-            # if smtp_config:
-            #     self.email_sender = EmailSender(smtp_config, self.db_manager)
+            # Initialize email sender if SMTP is configured
+            smtp_config = self.config_manager.get_smtp_config()
+            if smtp_config:
+                self.email_sender = EmailSender(smtp_config, self.db_manager)
                 
             # Initialize web scraper
             self.web_scraper = WebScraper()
@@ -217,9 +217,20 @@ class ApplicationController(QObject):
             return False
     
     def update_smtp_config(self, smtp_config: SMTPConfig) -> bool:
-        """SMTP configuration disabled - SMTP functionality was removed"""
-        self.status_update.emit("SMTP functionality has been removed - only Gemini AI is needed")
-        return True  # Return True to avoid errors, but SMTP is not actually configured
+        """Update SMTP configuration and reinitialize email sender"""
+        try:
+            # Save configuration
+            self.config_manager.set_smtp_config(smtp_config)
+            
+            # Reinitialize email sender with new config
+            self.email_sender = EmailSender(smtp_config, self.db_manager)
+            
+            self.status_update.emit("SMTP configuration updated successfully")
+            return True
+            
+        except Exception as e:
+            self.error_occurred.emit(f"Failed to update SMTP configuration: {str(e)}")
+            return False
     
     def test_gemini_connection(self) -> bool:
         """Test Gemini AI connection"""
@@ -450,8 +461,18 @@ class ApplicationController(QObject):
             return
             
         if not self.email_sender:
-            self.error_occurred.emit("SMTP client not configured")
-            return
+            # Try to initialize email sender if SMTP config exists
+            smtp_config = self.config_manager.get_smtp_config()
+            if smtp_config:
+                try:
+                    self.email_sender = EmailSender(smtp_config, self.db_manager)
+                    self.status_update.emit("SMTP client initialized for sending")
+                except Exception as e:
+                    self.error_occurred.emit(f"Failed to initialize SMTP client: {str(e)}")
+                    return
+            else:
+                self.error_occurred.emit("SMTP client not configured. Please configure SMTP settings first.")
+                return
             
         if not email_data:
             self.error_occurred.emit("No emails provided for sending")
