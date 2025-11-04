@@ -103,10 +103,10 @@ class EmailTab(QWidget):
         scroll_area.setStyleSheet("""
             QScrollArea {
                 border: none;
-                background-color: transparent;
+                background-color: #121212;
             }
             QScrollArea > QWidget > QWidget {
-                background-color: transparent;
+                background-color: #121212;
             }
         """)
         
@@ -121,15 +121,50 @@ class EmailTab(QWidget):
         gen_layout.setSpacing(12)
         
         # Info label with better styling
-        info_label = QLabel("Generate AI-powered cold emails for scraped websites")
+        info_label = QLabel("🤖 Generate AI-powered cold emails for scraped websites")
         info_label.setWordWrap(True)
-        info_label.setStyleSheet("color: #555; font-size: 13px; padding: 8px; background-color: #F8F9FA; border-radius: 5px;")
+        info_label.setStyleSheet("""
+            QLabel {
+                color: #B0B0B0; 
+                font-size: 13px; 
+                padding: 12px 16px; 
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+                    stop:0 rgba(33, 150, 243, 0.1), 
+                    stop:1 rgba(33, 150, 243, 0.05));
+                border: 1px solid rgba(33, 150, 243, 0.2);
+                border-radius: 8px;
+                font-weight: 500;
+            }
+        """)
         gen_layout.addWidget(info_label)
         
         # Generate button with better sizing
-        self.generate_button = QPushButton("Generate Cold Emails")
-        self.generate_button.setMinimumHeight(45)  # Taller for better visibility
-        self.generate_button.setStyleSheet("font-weight: bold; font-size: 14px;")
+        self.generate_button = QPushButton("🤖 Generate Cold Emails")
+        self.generate_button.setMinimumHeight(50)  # Taller for better visibility
+        self.generate_button.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #2196F3, stop:0.5 #21CBF3, stop:1 #2196F3);
+                color: white;
+                border: none;
+                padding: 15px 25px;
+                border-radius: 8px;
+                font-weight: 700;
+                font-size: 14px;
+                text-align: center;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #42A5F5, stop:0.5 #40E0D0, stop:1 #42A5F5);
+            }
+            QPushButton:pressed {
+                background: #1976D2;
+            }
+            QPushButton:disabled {
+                background: #424242;
+                color: #757575;
+            }
+        """)
         self.generate_button.setToolTip(
             "Generate AI-powered cold emails for scraped websites\n"
             "• Shortcut: Ctrl+G\n"
@@ -177,8 +212,18 @@ class EmailTab(QWidget):
         scraped_layout.addLayout(controls_layout)
         
         # Info about current emails
-        self.scraped_info_label = QLabel("No emails scraped yet")
-        self.scraped_info_label.setStyleSheet("color: #B0B0B0; font-size: 12px; padding: 5px;")
+        self.scraped_info_label = QLabel("📊 No emails scraped yet")
+        self.scraped_info_label.setStyleSheet("""
+            QLabel {
+                color: #B0B0B0; 
+                font-size: 12px; 
+                padding: 8px 12px;
+                background-color: rgba(45, 45, 45, 0.5);
+                border-radius: 6px;
+                border-left: 4px solid #2196F3;
+                font-weight: 500;
+            }
+        """)
         scraped_layout.addWidget(self.scraped_info_label)
         
         # Scraped emails table with scroll area
@@ -189,18 +234,73 @@ class EmailTab(QWidget):
         
         self.scraped_emails_table = QTableWidget()
         self.scraped_emails_table.setColumnCount(3)
-        self.scraped_emails_table.setHorizontalHeaderLabels(["Select", "Email", "Website"])
+        self.scraped_emails_table.setHorizontalHeaderLabels(["✓ Select", "📧 Email", "🌐 Website"])
         
-        # Configure scraped emails table
+        # Configure scraped emails table with professional styling
         scraped_header = self.scraped_emails_table.horizontalHeader()
         scraped_header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
         scraped_header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         scraped_header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         
-        self.scraped_emails_table.setColumnWidth(0, 60)
+        self.scraped_emails_table.setColumnWidth(0, 80)  # Wider for better checkbox visibility
         self.scraped_emails_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.scraped_emails_table.setAlternatingRowColors(True)
-        self.scraped_emails_table.verticalHeader().setDefaultSectionSize(30)
+        self.scraped_emails_table.verticalHeader().setDefaultSectionSize(40)  # Taller rows
+        
+        # Enhanced table styling
+        self.scraped_emails_table.setStyleSheet("""
+            QTableWidget {
+                background-color: #1E1E1E;
+                alternate-background-color: #2D2D2D;
+                border: 2px solid #404040;
+                border-radius: 10px;
+                gridline-color: #404040;
+                font-size: 12pt;
+                selection-background-color: #2196F3;
+                color: #FFFFFF;
+            }
+            QTableWidget::item {
+                padding: 8px 12px;
+                border: none;
+                color: #FFFFFF;
+            }
+            QTableWidget::item:selected {
+                background-color: rgba(33, 150, 243, 0.3);
+                color: #FFFFFF;
+            }
+            QTableWidget::item:hover {
+                background-color: #3D3D3D;
+            }
+            QHeaderView::section {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #2196F3, stop:1 #1976D2);
+                color: #FFFFFF;
+                padding: 12px 8px;
+                border: none;
+                font-weight: 700;
+                font-size: 13pt;
+            }
+            QCheckBox {
+                spacing: 8px;
+                color: #FFFFFF;
+            }
+            QCheckBox::indicator {
+                width: 20px;
+                height: 20px;
+                border: 2px solid #2196F3;
+                border-radius: 4px;
+                background-color: #1E1E1E;
+            }
+            QCheckBox::indicator:hover {
+                border-color: #42A5F5;
+                background-color: #2D2D2D;
+            }
+            QCheckBox::indicator:checked {
+                background-color: #2196F3;
+                border-color: #2196F3;
+                image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOSIgdmlld0JveD0iMCAwIDEyIDkiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xIDQuNUw0LjUgOEwxMSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K);
+            }
+        """)
         
         scraped_scroll.setWidget(self.scraped_emails_table)
         scraped_layout.addWidget(scraped_scroll)
@@ -208,15 +308,72 @@ class EmailTab(QWidget):
         # Scraped emails controls
         scraped_controls = QHBoxLayout()
         
-        self.select_all_scraped_btn = QPushButton("Select All")
+        self.select_all_scraped_btn = QPushButton("✓ Select All")
+        self.select_all_scraped_btn.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #4CAF50, stop:1 #388E3C);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 11pt;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #66BB6A, stop:1 #4CAF50);
+            }
+            QPushButton:pressed {
+                background: #2E7D32;
+            }
+        """)
         self.select_all_scraped_btn.clicked.connect(self.select_all_scraped_emails)
         scraped_controls.addWidget(self.select_all_scraped_btn)
         
-        self.select_none_scraped_btn = QPushButton("Select None")
+        self.select_none_scraped_btn = QPushButton("✗ Select None")
+        self.select_none_scraped_btn.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #FF9800, stop:1 #F57C00);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 11pt;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #FFB74D, stop:1 #FF9800);
+            }
+            QPushButton:pressed {
+                background: #E65100;
+            }
+        """)
         self.select_none_scraped_btn.clicked.connect(self.select_none_scraped_emails)
         scraped_controls.addWidget(self.select_none_scraped_btn)
         
-        self.refresh_scraped_btn = QPushButton("Refresh from Dashboard")
+        self.refresh_scraped_btn = QPushButton("🔄 Refresh from Dashboard")
+        self.refresh_scraped_btn.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #2196F3, stop:1 #1976D2);
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 11pt;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #42A5F5, stop:1 #2196F3);
+            }
+            QPushButton:pressed {
+                background: #1565C0;
+            }
+        """)
         self.refresh_scraped_btn.clicked.connect(self.refresh_scraped_emails)
         scraped_controls.addWidget(self.refresh_scraped_btn)
         
@@ -234,7 +391,7 @@ class EmailTab(QWidget):
         self.emails_table = QTableWidget()
         self.emails_table.setColumnCount(4)
         self.emails_table.setHorizontalHeaderLabels([
-            "Select", "Website", "Subject", "Status"
+            "✓ Select", "🌐 Website", "📧 Subject", "📊 Status"
         ])
         
         # Configure table with better column sizing and readability
@@ -259,7 +416,42 @@ class EmailTab(QWidget):
         self.emails_table.setMinimumHeight(350)
         
         # Improve row height for better readability
-        self.emails_table.verticalHeader().setDefaultSectionSize(35)
+        self.emails_table.verticalHeader().setDefaultSectionSize(40)
+        
+        # Enhanced table styling
+        self.emails_table.setStyleSheet("""
+            QTableWidget {
+                background-color: #1E1E1E;
+                alternate-background-color: #2D2D2D;
+                border: 2px solid #404040;
+                border-radius: 10px;
+                gridline-color: #404040;
+                font-size: 12pt;
+                selection-background-color: #2196F3;
+                color: #FFFFFF;
+            }
+            QTableWidget::item {
+                padding: 10px 12px;
+                border: none;
+                color: #FFFFFF;
+            }
+            QTableWidget::item:selected {
+                background-color: rgba(33, 150, 243, 0.3);
+                color: #FFFFFF;
+            }
+            QTableWidget::item:hover {
+                background-color: #3D3D3D;
+            }
+            QHeaderView::section {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #2196F3, stop:1 #1976D2);
+                color: #FFFFFF;
+                padding: 12px 8px;
+                border: none;
+                font-weight: 700;
+                font-size: 13pt;
+            }
+        """)
         
         list_layout.addWidget(self.emails_table)
         
@@ -267,13 +459,45 @@ class EmailTab(QWidget):
         actions_layout = QHBoxLayout()
         actions_layout.setSpacing(10)
         
-        select_all_btn = QPushButton("Select All")
+        select_all_btn = QPushButton("✓ Select All")
         select_all_btn.setMinimumHeight(35)  # Make buttons taller for better usability
+        select_all_btn.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #4CAF50, stop:1 #388E3C);
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 11pt;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #66BB6A, stop:1 #4CAF50);
+            }
+        """)
         select_all_btn.clicked.connect(self.select_all_emails)
         actions_layout.addWidget(select_all_btn)
         
-        select_none_btn = QPushButton("Select None")
+        select_none_btn = QPushButton("✗ Select None")
         select_none_btn.setMinimumHeight(35)
+        select_none_btn.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #FF9800, stop:1 #F57C00);
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-weight: 600;
+                font-size: 11pt;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #FFB74D, stop:1 #FF9800);
+            }
+        """)
         select_none_btn.clicked.connect(self.select_no_emails)
         actions_layout.addWidget(select_none_btn)
         
@@ -290,14 +514,50 @@ class EmailTab(QWidget):
         list_layout.addSpacing(15)
         
         # Recipient count label with better styling
-        self.recipient_count_label = QLabel("0 recipients selected")
+        self.recipient_count_label = QLabel("👥 0 recipients selected")
         self.recipient_count_label.setProperty("class", "subtitle")
-        self.recipient_count_label.setStyleSheet("font-weight: bold; color: #1976D2; padding: 5px;")
+        self.recipient_count_label.setStyleSheet("""
+            QLabel {
+                font-weight: 700; 
+                color: #2196F3; 
+                padding: 10px 15px;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 rgba(33, 150, 243, 0.1), 
+                    stop:1 rgba(33, 150, 243, 0.05));
+                border: 2px solid rgba(33, 150, 243, 0.3);
+                border-radius: 8px;
+                font-size: 13pt;
+            }
+        """)
         send_controls_layout.addWidget(self.recipient_count_label)
         
         # Send button with better sizing
-        self.send_button = QPushButton("Send Selected Emails")
-        self.send_button.setMinimumHeight(45)  # Slightly taller for better visibility
+        self.send_button = QPushButton("📧 Send Selected Emails")
+        self.send_button.setMinimumHeight(50)  # Slightly taller for better visibility
+        self.send_button.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #4CAF50, stop:0.5 #8BC34A, stop:1 #4CAF50);
+                color: white;
+                border: none;
+                padding: 15px 25px;
+                border-radius: 8px;
+                font-weight: 700;
+                font-size: 14px;
+                text-align: center;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #66BB6A, stop:0.5 #9CCC65, stop:1 #66BB6A);
+            }
+            QPushButton:pressed {
+                background: #388E3C;
+            }
+            QPushButton:disabled {
+                background: #424242;
+                color: #757575;
+            }
+        """)
         self.send_button.setToolTip(
             "Send selected emails to scraped recipients\n"
             "• Shortcut: Ctrl+Shift+S\n"
@@ -663,11 +923,43 @@ class EmailTab(QWidget):
             for email_addr in emails:
                 self.scraped_emails_table.insertRow(row)
                 
-                # Checkbox for selection
+                # Checkbox for selection with enhanced styling
                 checkbox = QCheckBox()
                 checkbox.setChecked(True)  # Default to selected
                 checkbox.stateChanged.connect(self.on_scraped_email_selection_changed)
-                self.scraped_emails_table.setCellWidget(row, 0, checkbox)
+                
+                # Create a container widget to center the checkbox
+                checkbox_widget = QWidget()
+                checkbox_layout = QHBoxLayout(checkbox_widget)
+                checkbox_layout.addWidget(checkbox)
+                checkbox_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                checkbox_layout.setContentsMargins(0, 0, 0, 0)
+                
+                # Enhanced checkbox styling
+                checkbox.setStyleSheet("""
+                    QCheckBox {
+                        spacing: 8px;
+                        color: #FFFFFF;
+                    }
+                    QCheckBox::indicator {
+                        width: 22px;
+                        height: 22px;
+                        border: 2px solid #2196F3;
+                        border-radius: 5px;
+                        background-color: #1E1E1E;
+                    }
+                    QCheckBox::indicator:hover {
+                        border-color: #42A5F5;
+                        background-color: #2D2D2D;
+                    }
+                    QCheckBox::indicator:checked {
+                        background-color: #2196F3;
+                        border-color: #2196F3;
+                        image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOSIgdmlld0JveD0iMCAwIDEyIDkiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xIDQuNUw0LjUgOEwxMSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K);
+                    }
+                """)
+                
+                self.scraped_emails_table.setCellWidget(row, 0, checkbox_widget)
                 
                 # Email address
                 email_item = QTableWidgetItem(email_addr)
@@ -710,15 +1002,17 @@ class EmailTab(QWidget):
         """Handle changes in scraped email selection"""
         selected_count = 0
         for row in range(self.scraped_emails_table.rowCount()):
-            checkbox = self.scraped_emails_table.cellWidget(row, 0)
-            if checkbox and checkbox.isChecked():
-                selected_count += 1
+            checkbox_widget = self.scraped_emails_table.cellWidget(row, 0)
+            if checkbox_widget:
+                checkbox = checkbox_widget.findChild(QCheckBox)
+                if checkbox and checkbox.isChecked():
+                    selected_count += 1
         
         # Update info label
         total_count = self.scraped_emails_table.rowCount()
         filter_text = self.email_filter_combo.currentText()
         self.scraped_info_label.setText(
-            f"Showing {total_count} emails ({filter_text}) - {selected_count} selected"
+            f"📊 Showing {total_count} emails ({filter_text}) - ✓ {selected_count} selected"
         )
         
         # Enable/disable generate button based on selection
@@ -727,17 +1021,21 @@ class EmailTab(QWidget):
     def select_all_scraped_emails(self):
         """Select all scraped emails"""
         for row in range(self.scraped_emails_table.rowCount()):
-            checkbox = self.scraped_emails_table.cellWidget(row, 0)
-            if checkbox:
-                checkbox.setChecked(True)
+            checkbox_widget = self.scraped_emails_table.cellWidget(row, 0)
+            if checkbox_widget:
+                checkbox = checkbox_widget.findChild(QCheckBox)
+                if checkbox:
+                    checkbox.setChecked(True)
         self.on_scraped_email_selection_changed()
     
     def select_none_scraped_emails(self):
         """Deselect all scraped emails"""
         for row in range(self.scraped_emails_table.rowCount()):
-            checkbox = self.scraped_emails_table.cellWidget(row, 0)
-            if checkbox:
-                checkbox.setChecked(False)
+            checkbox_widget = self.scraped_emails_table.cellWidget(row, 0)
+            if checkbox_widget:
+                checkbox = checkbox_widget.findChild(QCheckBox)
+                if checkbox:
+                    checkbox.setChecked(False)
         self.on_scraped_email_selection_changed()
     
     def clear_all_cached_data(self):
@@ -812,20 +1110,22 @@ class EmailTab(QWidget):
         filtered_emails = self.apply_email_filter(self.scraped_emails)
         
         for row in range(self.scraped_emails_table.rowCount()):
-            checkbox = self.scraped_emails_table.cellWidget(row, 0)
-            if checkbox and checkbox.isChecked():
-                email_item = self.scraped_emails_table.item(row, 1)
-                website_item = self.scraped_emails_table.item(row, 2)
-                
-                if email_item and website_item:
-                    # Find the corresponding EmailModel from filtered emails
-                    email_addr = email_item.text()
-                    website = website_item.text()
+            checkbox_widget = self.scraped_emails_table.cellWidget(row, 0)
+            if checkbox_widget:
+                checkbox = checkbox_widget.findChild(QCheckBox)
+                if checkbox and checkbox.isChecked():
+                    email_item = self.scraped_emails_table.item(row, 1)
+                    website_item = self.scraped_emails_table.item(row, 2)
                     
-                    for email_model in filtered_emails:
-                        if email_model.email == email_addr and email_model.source_website == website:
-                            selected_emails.append(email_model)
-                            break
+                    if email_item and website_item:
+                        # Find the corresponding EmailModel from filtered emails
+                        email_addr = email_item.text()
+                        website = website_item.text()
+                        
+                        for email_model in filtered_emails:
+                            if email_model.email == email_addr and email_model.source_website == website:
+                                selected_emails.append(email_model)
+                                break
         
         return selected_emails
     
