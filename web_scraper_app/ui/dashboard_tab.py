@@ -240,6 +240,7 @@ class DashboardTab(QWidget):
     
     # Signals for communication with main window and controller
     start_scraping_requested = pyqtSignal(list)  # List of URLs to scrape
+    start_crawling_requested = pyqtSignal(list)  # List of URLs to deep crawl
     export_results_requested = pyqtSignal(str)   # File path for export
     export_filtered_requested = pyqtSignal(dict) # Filter options for export
     
@@ -406,7 +407,7 @@ class DashboardTab(QWidget):
         # Control buttons
         button_layout = QHBoxLayout()
         
-        self.start_scraping_btn = QPushButton("Start Scraping")
+        self.start_scraping_btn = QPushButton("🔍 Start Scraping")
         self.start_scraping_btn.setProperty("class", "primary-button")
         self.start_scraping_btn.setToolTip(
             "Begin scraping all URLs in the list for email addresses\n"
@@ -419,9 +420,24 @@ class DashboardTab(QWidget):
         self.start_scraping_btn.clicked.connect(self.start_scraping)
         button_layout.addWidget(self.start_scraping_btn)
         
-        self.stop_scraping_btn = QPushButton("Stop Scraping")
+        self.start_crawling_btn = QPushButton("🕷️ Start Deep Crawl")
+        self.start_crawling_btn.setProperty("class", "success-button")
+        self.start_crawling_btn.setToolTip(
+            "Deep crawl websites to discover and scrape subdomains\n"
+            "• Discovers all subdomains and internal pages\n"
+            "• More comprehensive than regular scraping\n"
+            "• Takes longer but finds more emails\n"
+            "• Uses advanced crawling technology\n\n"
+            "⚠️ Currently disabled - crawl4ai integration in progress"
+        )
+        self.start_crawling_btn.setAccessibleName("Start Deep Crawl Button")
+        self.start_crawling_btn.setAccessibleDescription("Deep crawl websites to discover subdomains and scrape comprehensively")
+        self.start_crawling_btn.clicked.connect(self.start_crawling)
+        button_layout.addWidget(self.start_crawling_btn)
+        
+        self.stop_scraping_btn = QPushButton("⏹️ Stop Operation")
         self.stop_scraping_btn.setProperty("class", "danger-button")
-        self.stop_scraping_btn.setToolTip("Stop the current scraping operation (Esc)")
+        self.stop_scraping_btn.setToolTip("Stop the current scraping or crawling operation (Esc)")
         self.stop_scraping_btn.setEnabled(False)
         button_layout.addWidget(self.stop_scraping_btn)
         
@@ -658,8 +674,10 @@ class DashboardTab(QWidget):
         count = self.url_list_widget.rowCount()
         self.url_count_label.setText(f"URLs: {count}")
         
-        # Enable/disable start scraping button
+        # Enable/disable start buttons
         self.start_scraping_btn.setEnabled(count > 0)
+        # Crawling temporarily disabled
+        self.start_crawling_btn.setEnabled(False)
     
     def start_scraping(self):
         """Start the scraping process"""
@@ -684,13 +702,56 @@ class DashboardTab(QWidget):
         # Emit signal to start scraping
         self.start_scraping_requested.emit(urls)
     
+    def start_crawling(self):
+        """Start the deep crawling process"""
+        urls = self.url_list_widget.get_all_urls()
+        
+        if not urls:
+            QMessageBox.warning(self, "No URLs", "Please add some URLs to crawl.")
+            return
+        
+        # Show crawling confirmation dialog
+        reply = QMessageBox.question(
+            self,
+            "Deep Crawl Confirmation",
+            f"Start deep crawling {len(urls)} websites?\n\n"
+            "Deep crawling will:\n"
+            "• Discover subdomains and internal pages\n"
+            "• Take significantly longer than regular scraping\n"
+            "• Find more comprehensive email results\n"
+            "• Use advanced crawling technology\n\n"
+            "This operation may take several minutes per website.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+        
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+            
+        # Clear previous results
+        self.clear_results()
+        
+        # Update UI state
+        self.start_scraping_btn.setEnabled(False)
+        self.start_crawling_btn.setEnabled(False)
+        self.stop_scraping_btn.setEnabled(True)
+        self.progress_bar.setVisible(True)
+        self.progress_bar.setRange(0, len(urls))
+        self.progress_bar.setValue(0)
+        
+        self.status_label.setText(f"Starting deep crawl of {len(urls)} websites...")
+        
+        # Emit signal to start crawling (we'll add this signal)
+        self.start_crawling_requested.emit(urls)
+    
     def stop_scraping(self):
-        """Stop the scraping process"""
+        """Stop the scraping or crawling process"""
         # This will be connected to the controller's stop method
         self.start_scraping_btn.setEnabled(True)
+        self.start_crawling_btn.setEnabled(True)
         self.stop_scraping_btn.setEnabled(False)
         self.progress_bar.setVisible(False)
-        self.status_label.setText("Scraping stopped by user")
+        self.status_label.setText("Operation stopped by user")
     
     def on_scraping_progress(self, current: int, total: int, current_url: str = ""):
         """Handle scraping progress updates"""
@@ -703,11 +764,12 @@ class DashboardTab(QWidget):
     def on_scraping_completed(self):
         """Handle scraping completion"""
         self.start_scraping_btn.setEnabled(True)
+        self.start_crawling_btn.setEnabled(True)
         self.stop_scraping_btn.setEnabled(False)
         self.progress_bar.setVisible(False)
         
         results_count = self.results_widget.get_results_count()
-        self.status_label.setText(f"Scraping completed! Found {results_count} emails.")
+        self.status_label.setText(f"Operation completed! Found {results_count} emails.")
         
         # Enable export buttons if we have results
         self.export_csv_btn.setEnabled(results_count > 0)
