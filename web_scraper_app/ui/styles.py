@@ -3,63 +3,65 @@ QSS Styling definitions for the Web Scraper Email Automation Tool
 Professional green/black color scheme
 """
 
-# Professional Dark Mode Color Palette - Modern & Readable
+# Modern Professional Color Palette - Elegant Dark Theme with Gold Accents
 COLORS = {
-    # Primary colors - Dark theme with blue accents
-    'primary_navy': '#2196F3',      # Bright blue for accents
-    'dark_navy': '#1976D2',        # Darker blue for hover
-    'medium_navy': '#42A5F5',      # Medium blue for highlights
-    'light_navy': '#64B5F6',       # Light blue for subtle accents
+    # Primary Background Colors
+    'primary_bg': '#1e1e1e',       # Very dark charcoal/off-black
+    'content_bg': '#2a2a2a',       # Slightly lighter dark gray for cards/inputs
+    'tertiary_bg': '#242424',      # Alternative background for zebra striping
+    'hover_bg': '#3a3a3a',         # Hover state background
     
-    # Neutral colors - Dark mode
-    'primary_dark': '#121212',     # Very dark background (Material Design)
-    'secondary_dark': '#1E1E1E',   # Secondary dark background
-    'light_gray': '#2D2D2D',       # Dark gray for cards/panels
-    'medium_gray': '#3D3D3D',      # Medium gray for borders
-    'dark_gray': '#4D4D4D',        # Lighter gray for subtle elements
-    'border_gray': '#404040',      # Dark border color
-    'white': '#FFFFFF',            # Pure white for contrast
+    # Accent Colors - The Professional Palette
+    'primary_gold': '#D4AF37',     # Rich, modern gold for primary actions
+    'gold_hover': '#E6C547',       # Lighter gold for hover states
+    'gold_pressed': '#B8860B',     # Darker gold for pressed states
+    'secondary_blue': '#0078d4',   # Professional clean blue for secondary actions
+    'blue_hover': '#106ebe',       # Darker blue for hover
+    'danger_red': '#E74C3C',       # Clear but not overly bright red
+    'danger_hover': '#C0392B',     # Darker red for hover
+    'success_green': '#27AE60',    # Professional green
+    'warning_orange': '#F39C12',   # Professional orange
     
-    # Status colors - Dark mode friendly
-    'success_green': '#4CAF50',    # Bright green for success
-    'error_red': '#F44336',        # Bright red for errors
-    'warning_orange': '#FF9800',   # Orange for warnings
-    'info_blue': '#2196F3',        # Blue for info
-    
-    # Text colors - Dark mode optimized
-    'text_primary': '#FFFFFF',     # White text for dark backgrounds
-    'text_secondary': '#B0B0B0',   # Light gray for secondary text
-    'text_disabled': '#757575',    # Medium gray for disabled text
+    # Text Colors - High Contrast for Dark Mode
+    'text_primary': '#F0F0F0',     # White/very light gray for high contrast
+    'text_secondary': '#AAAAAA',   # Medium gray for placeholder/secondary text
+    'text_disabled': '#666666',    # Darker gray for disabled text
     'text_white': '#FFFFFF',       # Pure white
-    'text_on_navy': '#FFFFFF',     # White text on blue backgrounds
+    'text_on_gold': '#1e1e1e',     # Dark text for gold backgrounds
+    'text_title': '#0078d4',       # Professional blue for titles
     
-    # Background colors - Dark mode
-    'bg_primary': '#121212',       # Primary dark background
-    'bg_secondary': '#1E1E1E',     # Secondary dark background
-    'bg_tertiary': '#2D2D2D',      # Tertiary background for cards
-    'bg_dark': '#0D0D0D',          # Even darker for contrast
-    'bg_input': '#2D2D2D',         # Dark input field background
-    'bg_hover': '#3D3D3D'          # Hover state background
+    # Border and UI Element Colors
+    'border_default': '#444444',   # Default border color
+    'border_focus': '#D4AF37',     # Gold border for focused elements
+    'border_hover': '#0078d4',     # Blue border for hover states
+    'scrollbar_bg': '#2a2a2a',     # Scrollbar background
+    'scrollbar_handle': '#555555', # Scrollbar handle
+    'scrollbar_hover': '#D4AF37',  # Gold scrollbar on hover
 }
 
-# Modern Professional Application Style
+# Modern Professional Application Style - Elegant Dark Theme with Gold Accents
 MAIN_STYLE = f"""
-/* ===== MAIN WINDOW ===== */
+/* ===== MAIN WINDOW & BASE STYLING ===== */
 QMainWindow {{
-    background-color: {COLORS['bg_primary']};
+    background-color: {COLORS['primary_bg']};
     color: {COLORS['text_primary']};
-    font-family: 'Segoe UI', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    font-family: 'Segoe UI', 'Inter', 'Roboto', 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
     font-size: 12pt;
     font-weight: 400;
 }}
 
+QWidget {{
+    background-color: {COLORS['primary_bg']};
+    color: {COLORS['text_primary']};
+}}
+
 /* ===== MENU BAR ===== */
 QMenuBar {{
-    background-color: {COLORS['bg_primary']};
+    background-color: {COLORS['primary_bg']};
     color: {COLORS['text_primary']};
     border: none;
-    border-bottom: 1px solid {COLORS['border_gray']};
-    padding: 2px 8px;
+    border-bottom: 1px solid {COLORS['border_default']};
+    padding: 4px 8px;
     font-weight: 500;
 }}
 
@@ -67,66 +69,51 @@ QMenuBar::item {{
     background-color: transparent;
     padding: 8px 16px;
     margin: 0px 2px;
-    border-radius: 6px;
+    border-radius: 4px;
     color: {COLORS['text_primary']};
 }}
 
 QMenuBar::item:selected {{
-    background-color: {COLORS['primary_navy']};
-    color: {COLORS['text_white']};
+    background-color: {COLORS['content_bg']};
+    color: {COLORS['text_primary']};
 }}
 
 QMenuBar::item:pressed {{
-    background-color: {COLORS['dark_navy']};
-    color: {COLORS['text_white']};
+    background-color: {COLORS['hover_bg']};
+    color: {COLORS['text_primary']};
 }}
 
 QMenu {{
-    background-color: {COLORS['bg_primary']};
+    background-color: {COLORS['primary_bg']};
     color: {COLORS['text_primary']};
-    border: 1px solid {COLORS['border_gray']};
-    border-radius: 8px;
-    padding: 8px 0px;
+    border: 1px solid {COLORS['border_default']};
+    border-radius: 6px;
+    padding: 6px 0px;
 }}
 
 QMenu::item {{
-    padding: 10px 20px;
-    margin: 2px 8px;
-    border-radius: 6px;
+    padding: 8px 20px;
+    margin: 2px 6px;
+    border-radius: 4px;
     color: {COLORS['text_primary']};
 }}
 
 QMenu::item:selected {{
-    background-color: {COLORS['primary_navy']};
-    color: {COLORS['text_white']};
+    background-color: {COLORS['content_bg']};
+    color: {COLORS['text_primary']};
 }}
 
 QMenu::separator {{
     height: 1px;
-    background-color: {COLORS['border_gray']};
-    margin: 8px 16px;
+    background-color: {COLORS['border_default']};
+    margin: 6px 12px;
 }}
 
-/* ===== STATUS BAR ===== */
-QStatusBar {{
-    background-color: {COLORS['bg_dark']};
-    color: {COLORS['text_white']};
-    border: none;
-    padding: 6px 12px;
-    font-size: 10pt;
-}}
-
-QStatusBar QLabel {{
-    color: {COLORS['text_white']};
-    padding: 0px 8px;
-}}
-
-/* ===== TAB WIDGET ===== */
+/* ===== TAB WIDGET - MAIN NAVIGATION ===== */
 QTabWidget::pane {{
-    border: 1px solid {COLORS['border_gray']};
-    background-color: {COLORS['bg_primary']};
-    border-radius: 8px;
-    margin-top: -1px;
+    border: 0px;
+    background-color: {COLORS['primary_bg']};
+    border-radius: 0px;
 }}
 
 QTabWidget::tab-bar {{
@@ -134,144 +121,118 @@ QTabWidget::tab-bar {{
 }}
 
 QTabBar::tab {{
-    background-color: {COLORS['bg_tertiary']};
+    background-color: transparent;
     color: {COLORS['text_secondary']};
-    padding: 12px 24px;
+    padding: 10px 15px;
     margin-right: 2px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    min-width: 120px;
+    border-bottom: 2px solid transparent;
     font-weight: 500;
-    border: 1px solid {COLORS['border_gray']};
-    border-bottom: none;
+    font-size: 12pt;
+    min-width: 100px;
 }}
 
 QTabBar::tab:selected {{
-    background-color: {COLORS['primary_navy']};
-    color: {COLORS['text_white']};
-    border-color: {COLORS['primary_navy']};
+    color: {COLORS['primary_gold']};
+    border-bottom: 2px solid {COLORS['primary_gold']};
+    font-weight: 600;
 }}
 
 QTabBar::tab:hover:!selected {{
-    background-color: {COLORS['medium_navy']};
-    color: {COLORS['text_white']};
-    border-color: {COLORS['medium_navy']};
-}}
-
-/* ===== TAB CONTENT AREAS - Fix white background ===== */
-QWidget[class="tab-content"] {{
-    background-color: {COLORS['bg_primary']};
-}}
-
-/* Ensure all tab content widgets use dark background */
-QTabWidget > QWidget {{
-    background-color: {COLORS['bg_primary']};
-}}
-
-QScrollArea QWidget {{
-    background-color: {COLORS['bg_primary']};
+    background-color: {COLORS['content_bg']};
+    color: {COLORS['text_primary']};
+    border-radius: 4px 4px 0px 0px;
 }}
 
 /* ===== BUTTONS ===== */
 QPushButton {{
-    background-color: {COLORS['primary_navy']};
-    color: {COLORS['text_white']};
     border: none;
-    padding: 12px 24px;
-    border-radius: 6px;
-    font-weight: 600;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-weight: bold;
     font-size: 12pt;
-    min-width: 120px;
-    min-height: 20px;
+    min-width: 100px;
+    min-height: 16px;
 }}
 
-QPushButton:hover {{
-    background-color: {COLORS['dark_navy']};
+/* Primary Buttons - Gold */
+QPushButton[class="primary-button"], 
+QPushButton:default {{
+    background-color: {COLORS['primary_gold']};
+    color: {COLORS['text_on_gold']};
+    font-weight: bold;
 }}
 
-QPushButton:pressed {{
-    background-color: {COLORS['dark_navy']};
+QPushButton[class="primary-button"]:hover,
+QPushButton:default:hover {{
+    background-color: {COLORS['gold_hover']};
+    color: {COLORS['text_on_gold']};
 }}
 
-QPushButton:disabled {{
-    background-color: {COLORS['medium_gray']};
-    color: {COLORS['text_disabled']};
+QPushButton[class="primary-button"]:pressed,
+QPushButton:default:pressed {{
+    background-color: {COLORS['gold_pressed']};
+    color: {COLORS['text_on_gold']};
 }}
 
-/* Primary Button */
-QPushButton[class="primary-button"] {{
-    background-color: {COLORS['primary_navy']};
-    color: {COLORS['text_white']};
-    font-weight: 600;
-    padding: 14px 28px;
-    font-size: 13pt;
-}}
-
-QPushButton[class="primary-button"]:hover {{
-    background-color: {COLORS['dark_navy']};
-}}
-
-/* Secondary Button */
+/* Secondary Buttons - Gold Border */
 QPushButton[class="secondary-button"] {{
-    background-color: {COLORS['bg_primary']};
-    color: {COLORS['primary_navy']};
-    border: 2px solid {COLORS['primary_navy']};
-    font-weight: 600;
-    font-size: 12pt;
+    background-color: transparent;
+    border: 2px solid {COLORS['primary_gold']};
+    color: {COLORS['primary_gold']};
+    font-weight: bold;
 }}
 
 QPushButton[class="secondary-button"]:hover {{
-    background-color: {COLORS['primary_navy']};
-    color: {COLORS['text_white']};
+    background-color: {COLORS['primary_gold']};
+    color: {COLORS['text_on_gold']};
 }}
 
-/* Danger Button */
+QPushButton[class="secondary-button"]:pressed {{
+    background-color: {COLORS['gold_pressed']};
+    color: {COLORS['text_on_gold']};
+}}
+
+/* Danger Buttons - Red */
 QPushButton[class="danger-button"] {{
-    background-color: {COLORS['error_red']};
+    background-color: {COLORS['danger_red']};
     color: {COLORS['text_white']};
-    font-weight: 600;
+    font-weight: bold;
 }}
 
 QPushButton[class="danger-button"]:hover {{
-    background-color: #D32F2F;
+    background-color: {COLORS['danger_hover']};
+    color: {COLORS['text_white']};
 }}
 
-/* Success Button */
+/* Success Buttons - Green */
 QPushButton[class="success-button"] {{
     background-color: {COLORS['success_green']};
     color: {COLORS['text_white']};
-    font-weight: 600;
+    font-weight: bold;
 }}
 
 QPushButton[class="success-button"]:hover {{
-    background-color: #388E3C;
+    background-color: #229954;
+    color: {COLORS['text_white']};
 }}
 
-/* ===== INPUT FIELDS ===== */
-QLineEdit, QTextEdit, QPlainTextEdit {{
-    background-color: {COLORS['bg_input']};
-    border: 2px solid {COLORS['border_gray']};
-    border-radius: 6px;
-    padding: 12px 16px;
-    font-size: 12pt;
-    color: {COLORS['text_primary']};
-    selection-background-color: {COLORS['medium_navy']};
-    selection-color: {COLORS['text_white']};
+/* Blue Secondary Actions */
+QPushButton[class="blue-button"] {{
+    background-color: {COLORS['secondary_blue']};
+    color: {COLORS['text_white']};
+    font-weight: bold;
 }}
 
-QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {{
-    border-color: {COLORS['primary_navy']};
-    outline: none;
+QPushButton[class="blue-button"]:hover {{
+    background-color: {COLORS['blue_hover']};
+    color: {COLORS['text_white']};
 }}
 
-QLineEdit:disabled, QTextEdit:disabled, QPlainTextEdit:disabled {{
-    background-color: {COLORS['bg_tertiary']};
+/* Disabled Buttons */
+QPushButton:disabled {{
+    background-color: {COLORS['content_bg']};
     color: {COLORS['text_disabled']};
-    border-color: {COLORS['medium_gray']};
-}}
-
-QLineEdit::placeholder, QTextEdit::placeholder, QPlainTextEdit::placeholder {{
-    color: {COLORS['text_secondary']};
+    border: 1px solid {COLORS['text_disabled']};
 }}
 
 /* ===== LABELS ===== */
@@ -279,115 +240,132 @@ QLabel {{
     color: {COLORS['text_primary']};
     font-size: 12pt;
     font-weight: 400;
+    background-color: transparent;
 }}
 
+/* Title Labels - Blue */
 QLabel[class="title"] {{
-    font-size: 20pt;
-    font-weight: 700;
-    color: {COLORS['primary_navy']};
-    margin: 16px 0px 12px 0px;
+    font-size: 18pt;
+    font-weight: bold;
+    color: {COLORS['text_title']};
+    margin: 8px 0px;
 }}
 
-QLabel[class="subtitle"] {{
-    font-size: 16pt;
-    font-weight: 600;
+/* Section Headers */
+QLabel[class="section-header"] {{
+    font-size: 12pt;
+    font-weight: bold;
     color: {COLORS['text_primary']};
-    margin: 12px 0px 8px 0px;
+    border-bottom: 1px solid {COLORS['border_default']};
+    margin-top: 10px;
+    padding-bottom: 4px;
 }}
 
-QLabel[class="info-label"] {{
-    font-size: 12pt;
+/* Secondary Text */
+QLabel[class="secondary"] {{
     color: {COLORS['text_secondary']};
-    font-weight: 500;
+    font-size: 11pt;
 }}
 
-QLabel[class="status-label"] {{
-    font-size: 12pt;
-    font-weight: 600;
-    padding: 6px 12px;
-    border-radius: 6px;
-}}
-
-QLabel[class="error"] {{
-    color: {COLORS['error_red']};
-    font-weight: 600;
-    background-color: rgba(244, 67, 54, 0.1);
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid {COLORS['error_red']};
-}}
-
-QLabel[class="success"] {{
+/* Status Labels */
+QLabel[class="status-success"] {{
     color: {COLORS['success_green']};
     font-weight: 600;
-    background-color: rgba(76, 175, 80, 0.1);
-    padding: 8px 12px;
-    border-radius: 6px;
+    background-color: rgba(39, 174, 96, 0.1);
+    padding: 6px 12px;
+    border-radius: 4px;
     border: 1px solid {COLORS['success_green']};
 }}
 
-QLabel[class="warning"] {{
+QLabel[class="status-error"] {{
+    color: {COLORS['danger_red']};
+    font-weight: 600;
+    background-color: rgba(231, 76, 60, 0.1);
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid {COLORS['danger_red']};
+}}
+
+QLabel[class="status-warning"] {{
     color: {COLORS['warning_orange']};
     font-weight: 600;
-    background-color: rgba(255, 152, 0, 0.1);
-    padding: 8px 12px;
-    border-radius: 6px;
+    background-color: rgba(243, 156, 18, 0.1);
+    padding: 6px 12px;
+    border-radius: 4px;
     border: 1px solid {COLORS['warning_orange']};
+}}
+
+/* ===== INPUT FIELDS ===== */
+QLineEdit, QTextEdit, QPlainTextEdit {{
+    background-color: {COLORS['content_bg']};
+    border: 1px solid {COLORS['border_default']};
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 12pt;
+    color: {COLORS['text_primary']};
+    selection-background-color: {COLORS['primary_gold']};
+    selection-color: {COLORS['text_on_gold']};
+}}
+
+QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {{
+    border: 1px solid {COLORS['border_focus']};
+    outline: none;
+}}
+
+QLineEdit:disabled, QTextEdit:disabled, QPlainTextEdit:disabled {{
+    background-color: {COLORS['tertiary_bg']};
+    color: {COLORS['text_disabled']};
+    border-color: {COLORS['text_disabled']};
+}}
+
+QLineEdit::placeholder, QTextEdit::placeholder, QPlainTextEdit::placeholder {{
+    color: {COLORS['text_secondary']};
 }}
 
 /* ===== TABLES ===== */
 QTableWidget {{
-    background-color: {COLORS['bg_primary']};
-    alternate-background-color: {COLORS['bg_secondary']};
-    border: 2px solid {COLORS['border_gray']};
-    border-radius: 10px;
-    gridline-color: {COLORS['border_gray']};
+    background-color: {COLORS['primary_bg']};
+    alternate-background-color: {COLORS['tertiary_bg']};
+    border: 1px solid {COLORS['content_bg']};
+    gridline-color: {COLORS['content_bg']};
     font-size: 12pt;
-    selection-background-color: {COLORS['medium_navy']};
-    min-height: 200px;
+    selection-background-color: {COLORS['primary_gold']};
+    selection-color: {COLORS['text_on_gold']};
 }}
 
 QTableWidget::item {{
-    padding: 15px 12px;
+    padding: 8px;
     border: none;
     color: {COLORS['text_primary']};
 }}
 
 QTableWidget::item:selected {{
-    background-color: {COLORS['primary_navy']};
-    color: {COLORS['text_white']};
+    background-color: {COLORS['primary_gold']};
+    color: {COLORS['text_on_gold']};
 }}
 
 QTableWidget::item:hover {{
-    background-color: {COLORS['bg_hover']};
+    background-color: {COLORS['hover_bg']};
 }}
 
 QHeaderView::section {{
-    background-color: {COLORS['primary_navy']};
-    color: {COLORS['text_white']};
-    padding: 16px 12px;
+    background-color: {COLORS['content_bg']};
+    color: {COLORS['primary_gold']};
+    padding: 8px;
+    font-weight: bold;
     border: none;
-    font-weight: 700;
-    font-size: 13pt;
+    border-right: 1px solid {COLORS['border_default']};
 }}
 
 QHeaderView::section:hover {{
-    background-color: {COLORS['dark_navy']};
-}}
-
-QHeaderView::section:first {{
-    border-top-left-radius: 8px;
-}}
-
-QHeaderView::section:last {{
-    border-top-right-radius: 8px;
+    background-color: {COLORS['hover_bg']};
 }}
 
 /* ===== PROGRESS BAR ===== */
 QProgressBar {{
-    background-color: {COLORS['bg_tertiary']};
-    border: 1px solid {COLORS['border_gray']};
-    border-radius: 8px;
+    background-color: {COLORS['content_bg']};
+    border: 1px solid {COLORS['border_default']};
+    border-radius: 4px;
     text-align: center;
     font-weight: 600;
     font-size: 11pt;
@@ -397,86 +375,86 @@ QProgressBar {{
 
 QProgressBar::chunk {{
     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0 {COLORS['primary_navy']}, stop:1 {COLORS['medium_navy']});
-    border-radius: 7px;
+        stop:0 {COLORS['primary_gold']}, stop:1 {COLORS['gold_hover']});
+    border-radius: 3px;
 }}
 
 /* ===== COMBO BOX ===== */
 QComboBox {{
-    background-color: {COLORS['bg_primary']};
-    border: 2px solid {COLORS['border_gray']};
-    border-radius: 6px;
+    background-color: {COLORS['content_bg']};
+    border: 1px solid {COLORS['border_default']};
+    border-radius: 4px;
     padding: 8px 12px;
     min-width: 120px;
-    font-size: 11pt;
+    font-size: 12pt;
     color: {COLORS['text_primary']};
 }}
 
 QComboBox:focus {{
-    border-color: {COLORS['primary_navy']};
+    border-color: {COLORS['border_focus']};
 }}
 
 QComboBox:hover {{
-    border-color: {COLORS['medium_navy']};
+    border-color: {COLORS['border_hover']};
 }}
 
 QComboBox::drop-down {{
     border: none;
     width: 30px;
-    border-top-right-radius: 6px;
-    border-bottom-right-radius: 6px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
 }}
 
 QComboBox::down-arrow {{
     image: none;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-    border-top: 6px solid {COLORS['text_secondary']};
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid {COLORS['text_secondary']};
     margin-right: 8px;
 }}
 
 QComboBox QAbstractItemView {{
-    background-color: {COLORS['bg_primary']};
-    border: 1px solid {COLORS['border_gray']};
-    border-radius: 6px;
-    selection-background-color: {COLORS['primary_navy']};
-    selection-color: {COLORS['text_white']};
+    background-color: {COLORS['content_bg']};
+    border: 1px solid {COLORS['border_default']};
+    border-radius: 4px;
+    selection-background-color: {COLORS['primary_gold']};
+    selection-color: {COLORS['text_on_gold']};
     padding: 4px;
 }}
 
 QComboBox QAbstractItemView::item {{
-    padding: 10px 14px;
-    border-radius: 4px;
-    margin: 2px;
+    padding: 8px 12px;
+    border-radius: 2px;
+    margin: 1px;
 }}
 
 QComboBox QAbstractItemView::item:hover {{
-    background-color: {COLORS['medium_navy']};
-    color: {COLORS['text_white']};
+    background-color: {COLORS['hover_bg']};
+    color: {COLORS['text_primary']};
 }}
 
 /* ===== SCROLL BARS ===== */
 QScrollArea {{
     border: none;
-    background-color: {COLORS['bg_primary']};
+    background-color: {COLORS['primary_bg']};
 }}
 
 QScrollBar:vertical {{
-    background-color: {COLORS['bg_tertiary']};
-    width: 16px;
-    border-radius: 8px;
+    background-color: {COLORS['scrollbar_bg']};
+    width: 12px;
+    border-radius: 6px;
     margin: 2px;
 }}
 
 QScrollBar::handle:vertical {{
-    background-color: {COLORS['dark_gray']};
-    border-radius: 8px;
-    min-height: 40px;
+    background-color: {COLORS['scrollbar_handle']};
+    border-radius: 6px;
+    min-height: 30px;
     margin: 2px;
 }}
 
 QScrollBar::handle:vertical:hover {{
-    background-color: {COLORS['primary_navy']};
+    background-color: {COLORS['scrollbar_hover']};
 }}
 
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
@@ -484,21 +462,21 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
 }}
 
 QScrollBar:horizontal {{
-    background-color: {COLORS['bg_tertiary']};
-    height: 16px;
-    border-radius: 8px;
+    background-color: {COLORS['scrollbar_bg']};
+    height: 12px;
+    border-radius: 6px;
     margin: 2px;
 }}
 
 QScrollBar::handle:horizontal {{
-    background-color: {COLORS['dark_gray']};
-    border-radius: 8px;
-    min-width: 40px;
+    background-color: {COLORS['scrollbar_handle']};
+    border-radius: 6px;
+    min-width: 30px;
     margin: 2px;
 }}
 
 QScrollBar::handle:horizontal:hover {{
-    background-color: {COLORS['primary_navy']};
+    background-color: {COLORS['scrollbar_hover']};
 }}
 
 QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
@@ -509,89 +487,67 @@ QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
 QGroupBox {{
     font-weight: 600;
     font-size: 13pt;
-    border: 2px solid {COLORS['border_gray']};
-    border-radius: 10px;
-    margin-top: 20px;
-    padding-top: 20px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 15px;
-    background-color: {COLORS['bg_primary']};
+    border: 1px solid {COLORS['border_default']};
+    border-radius: 6px;
+    margin-top: 15px;
+    padding-top: 15px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-bottom: 10px;
+    background-color: {COLORS['primary_bg']};
 }}
 
 QGroupBox::title {{
     subcontrol-origin: margin;
-    left: 20px;
-    padding: 4px 12px;
-    color: {COLORS['primary_navy']};
-    background-color: {COLORS['bg_primary']};
-    font-size: 14pt;
-    font-weight: 700;
-    border: 1px solid {COLORS['border_gray']};
-    border-radius: 6px;
-}}
-
-/* ===== SPLITTER ===== */
-QSplitter::handle {{
-    background-color: {COLORS['border_gray']};
-}}
-
-QSplitter::handle:horizontal {{
-    width: 2px;
-    margin: 2px 0px;
-}}
-
-QSplitter::handle:vertical {{
-    height: 2px;
-    margin: 0px 2px;
-}}
-
-QSplitter::handle:pressed {{
-    background-color: {COLORS['primary_navy']};
+    left: 15px;
+    padding: 2px 8px;
+    color: {COLORS['text_title']};
+    background-color: {COLORS['primary_bg']};
+    font-size: 13pt;
+    font-weight: bold;
 }}
 
 /* ===== CHECKBOXES ===== */
 QCheckBox {{
     color: {COLORS['text_primary']};
-    font-size: 11pt;
-    spacing: 8px;
+    font-size: 12pt;
+    spacing: 6px;
 }}
 
 QCheckBox::indicator {{
-    width: 18px;
-    height: 18px;
-    border: 2px solid {COLORS['border_gray']};
-    border-radius: 4px;
-    background-color: {COLORS['bg_primary']};
+    width: 16px;
+    height: 16px;
+    border: 2px solid {COLORS['border_default']};
+    border-radius: 3px;
+    background-color: {COLORS['content_bg']};
 }}
 
 QCheckBox::indicator:hover {{
-    border-color: {COLORS['primary_navy']};
+    border-color: {COLORS['border_focus']};
 }}
 
 QCheckBox::indicator:checked {{
-    background-color: {COLORS['primary_navy']};
-    border-color: {COLORS['primary_navy']};
-    image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOSIgdmlld0JveD0iMCAwIDEyIDkiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xIDQuNUw0LjUgOEwxMSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K);
+    background-color: {COLORS['primary_gold']};
+    border-color: {COLORS['primary_gold']};
 }}
 
 /* ===== SPIN BOX ===== */
 QSpinBox {{
-    background-color: {COLORS['bg_primary']};
-    border: 2px solid {COLORS['border_gray']};
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 11pt;
+    background-color: {COLORS['content_bg']};
+    border: 1px solid {COLORS['border_default']};
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 12pt;
     color: {COLORS['text_primary']};
     min-width: 80px;
 }}
 
 QSpinBox:focus {{
-    border-color: {COLORS['primary_navy']};
+    border-color: {COLORS['border_focus']};
 }}
 
 QSpinBox::up-button, QSpinBox::down-button {{
-    width: 20px;
+    width: 18px;
     border: none;
     background-color: transparent;
 }}
@@ -612,29 +568,48 @@ QSpinBox::down-arrow {{
 
 /* ===== TOOLTIPS ===== */
 QToolTip {{
-    background-color: {COLORS['bg_dark']};
+    background-color: {COLORS['content_bg']};
     color: {COLORS['text_white']};
-    border: 1px solid {COLORS['primary_navy']};
-    border-radius: 6px;
-    padding: 10px 14px;
+    border: 1px solid {COLORS['primary_gold']};
+    border-radius: 4px;
+    padding: 8px 12px;
     font-size: 11pt;
     font-weight: 500;
 }}
 
 /* ===== DIALOG BOXES ===== */
 QDialog {{
-    background-color: {COLORS['bg_primary']};
+    background-color: {COLORS['primary_bg']};
     color: {COLORS['text_primary']};
 }}
 
 QMessageBox {{
-    background-color: {COLORS['bg_primary']};
+    background-color: {COLORS['primary_bg']};
     color: {COLORS['text_primary']};
 }}
 
 QMessageBox QPushButton {{
     min-width: 80px;
     padding: 8px 16px;
+}}
+
+/* ===== SPLITTER ===== */
+QSplitter::handle {{
+    background-color: {COLORS['border_default']};
+}}
+
+QSplitter::handle:horizontal {{
+    width: 2px;
+    margin: 2px 0px;
+}}
+
+QSplitter::handle:vertical {{
+    height: 2px;
+    margin: 0px 2px;
+}}
+
+QSplitter::handle:pressed {{
+    background-color: {COLORS['primary_gold']};
 }}
 """
 
