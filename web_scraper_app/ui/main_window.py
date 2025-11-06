@@ -361,6 +361,14 @@ class MainWindow(QMainWindow):
         if 0 <= index < len(tab_names):
             self.status_message.emit(f"Switched to {tab_names[index]} tab")
             
+            # Refresh scraped emails when switching to Email Generation tab
+            if index == 1 and hasattr(self, 'email_tab') and hasattr(self, 'controller') and self.controller:  # Email Generation tab
+                try:
+                    emails = self.controller.get_scraped_emails()
+                    self.email_tab.update_scraped_emails(emails)
+                except Exception as e:
+                    print(f"Error refreshing scraped emails: {e}")
+            
             # Update UI state
             self.state_manager.update_ui_state(tab_index=index)
     
@@ -451,6 +459,7 @@ class MainWindow(QMainWindow):
         """Connect dashboard tab signals to controller"""
         # Connect scraping signals
         self.dashboard_tab.start_scraping_requested.connect(self.controller.start_scraping)
+        self.dashboard_tab.start_crawling_requested.connect(self.controller.start_crawling)
         self.dashboard_tab.export_results_requested.connect(self.controller.export_scraped_emails_csv)
         self.dashboard_tab.export_filtered_requested.connect(self.handle_filtered_export)
         
@@ -462,6 +471,11 @@ class MainWindow(QMainWindow):
         self.controller.scraping_finished.connect(self.dashboard_tab.on_scraping_finished)
         self.controller.scraping_progress.connect(self.dashboard_tab.on_scraping_progress)
         self.controller.email_found.connect(self.dashboard_tab.on_email_found)
+        
+        # Connect crawling signals (reuse scraping handlers)
+        self.controller.crawling_started.connect(self.dashboard_tab.on_scraping_started)
+        self.controller.crawling_finished.connect(self.dashboard_tab.on_scraping_completed)
+        self.controller.crawling_progress.connect(self.dashboard_tab.on_scraping_progress)
         self.controller.error_occurred.connect(self.dashboard_tab.on_scraping_error)
         
         # Connect data updates for real-time email display
@@ -471,6 +485,7 @@ class MainWindow(QMainWindow):
         """Connect email tab signals to controller"""
         # Connect email generation signals
         self.email_tab.generate_emails_requested.connect(self.controller.generate_emails)
+        self.email_tab.generate_emails_for_selection_requested.connect(self.controller.generate_emails_for_selection)
         self.email_tab.send_emails_requested.connect(self.controller.send_emails)
         
         # Connect controller signals to email tab updates
@@ -488,6 +503,14 @@ class MainWindow(QMainWindow):
         
         # Update email tab with scraped emails when data changes
         self.controller.data_updated.connect(self.update_email_tab_data)
+        
+        # Initialize email tab with existing scraped emails
+        try:
+            existing_emails = self.controller.get_scraped_emails()
+            if existing_emails:
+                self.email_tab.update_scraped_emails(existing_emails)
+        except Exception as e:
+            print(f"Failed to load existing emails: {e}")
     
     def on_data_updated(self, data_type: str):
         """Handle data updates from controller"""
@@ -567,7 +590,11 @@ class MainWindow(QMainWindow):
         current_tab = self.tab_widget.currentIndex()
         
         if current_tab == 0:  # Dashboard
-            self.status_message.emit("Use 'Start Scraping' button to begin scraping")
+            # Trigger smart crawl if URLs are available
+            if hasattr(self, 'dashboard_tab') and self.dashboard_tab.url_list_widget.rowCount() > 0:
+                self.dashboard_tab.start_crawling()
+            else:
+                self.status_message.emit("Add URLs first, then use Ctrl+R to start Smart Crawl")
         elif current_tab == 1:  # Email
             self.status_message.emit("Use 'Generate Emails' button to create emails")
         elif current_tab == 2:  # History
