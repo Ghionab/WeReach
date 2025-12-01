@@ -9,11 +9,12 @@ from PyQt6.QtWidgets import (
     QFrame, QAbstractItemView
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QTimer
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QColor
 from datetime import datetime
 from typing import List, Optional
 
 from models import SentEmailModel
+from ui.styles import get_colors
 
 
 class HistoryTab(QWidget):
@@ -25,6 +26,7 @@ class HistoryTab(QWidget):
     
     def __init__(self):
         super().__init__()
+        self.colors = get_colors()
         self.email_history = []
         self.filtered_history = []
         self.setup_ui()
@@ -40,7 +42,7 @@ class HistoryTab(QWidget):
         layout.setSpacing(15)
         
         # Title
-        title_label = QLabel("📋 Email History & Tracking")
+        title_label = QLabel("Email History & Tracking")
         title_label.setProperty("class", "title")
         layout.addWidget(title_label)
         
@@ -102,7 +104,7 @@ class HistoryTab(QWidget):
         first_row.addWidget(self.clear_filters_btn)
         
         # Refresh button
-        self.refresh_btn = QPushButton("🔄 Refresh")
+        self.refresh_btn = QPushButton("Refresh")
         self.refresh_btn.setToolTip(
             "Refresh email history from database\n"
             "Shortcut: F5 (when on History tab)"
@@ -167,7 +169,7 @@ class HistoryTab(QWidget):
         
         # Table stats
         self.table_stats_label = QLabel("No emails found")
-        self.table_stats_label.setStyleSheet("color: #666; font-style: italic;")
+        self.table_stats_label.setProperty("class", "info-label")
         table_layout.addWidget(self.table_stats_label)
         
         parent_splitter.addWidget(table_widget)
@@ -237,11 +239,11 @@ class HistoryTab(QWidget):
         # Style status labels
         for label in [self.total_emails_label, self.sent_emails_label, 
                      self.failed_emails_label, self.pending_emails_label]:
-            label.setStyleSheet("font-weight: bold; padding: 5px;")
+            label.setProperty("class", "status-label")
         
-        self.sent_emails_label.setStyleSheet("font-weight: bold; padding: 5px; color: #4CAF50;")
-        self.failed_emails_label.setStyleSheet("font-weight: bold; padding: 5px; color: #F44336;")
-        self.pending_emails_label.setStyleSheet("font-weight: bold; padding: 5px; color: #FF9800;")
+        self.sent_emails_label.setStyleSheet(f"color: {self.colors['success']}; font-weight: bold;")
+        self.failed_emails_label.setStyleSheet(f"color: {self.colors['danger']}; font-weight: bold;")
+        self.pending_emails_label.setStyleSheet(f"color: {self.colors['warning']}; font-weight: bold;")
         
         status_layout.addWidget(self.total_emails_label)
         status_layout.addWidget(QLabel("|"))
@@ -254,7 +256,7 @@ class HistoryTab(QWidget):
         
         # Last updated label
         self.last_updated_label = QLabel("Last updated: Never")
-        self.last_updated_label.setStyleSheet("color: #666; font-style: italic;")
+        self.last_updated_label.setProperty("class", "info-label")
         status_layout.addWidget(self.last_updated_label)
         
         parent_layout.addWidget(status_frame)
@@ -321,14 +323,14 @@ class HistoryTab(QWidget):
             # Status with color coding
             status_item = QTableWidgetItem(email.status.title())
             if email.status == 'sent':
-                status_item.setBackground(Qt.GlobalColor.green)
-                status_item.setForeground(Qt.GlobalColor.white)
+                status_item.setBackground(QColor(self.colors['success']))
+                status_item.setForeground(QColor(self.colors['text_inverse']))
             elif email.status == 'failed':
-                status_item.setBackground(Qt.GlobalColor.red)
-                status_item.setForeground(Qt.GlobalColor.white)
+                status_item.setBackground(QColor(self.colors['danger']))
+                status_item.setForeground(QColor(self.colors['text_inverse']))
             elif email.status == 'pending':
-                status_item.setBackground(Qt.GlobalColor.yellow)
-                status_item.setForeground(Qt.GlobalColor.black)
+                status_item.setBackground(QColor(self.colors['warning']))
+                status_item.setForeground(QColor(self.colors['primary_bg']))
             self.history_table.setItem(row, 2, status_item)
             
             # Sent date
@@ -388,13 +390,13 @@ class HistoryTab(QWidget):
         status_text = f"Status: {email.status.title()}"
         if email.status == 'sent':
             self.detail_status.setText(status_text)
-            self.detail_status.setStyleSheet("color: #4CAF50; font-weight: bold;")
+            self.detail_status.setStyleSheet(f"color: {self.colors['success']}; font-weight: bold;")
         elif email.status == 'failed':
             self.detail_status.setText(status_text)
-            self.detail_status.setStyleSheet("color: #F44336; font-weight: bold;")
+            self.detail_status.setStyleSheet(f"color: {self.colors['danger']}; font-weight: bold;")
         elif email.status == 'pending':
             self.detail_status.setText(status_text)
-            self.detail_status.setStyleSheet("color: #FF9800; font-weight: bold;")
+            self.detail_status.setStyleSheet(f"color: {self.colors['warning']}; font-weight: bold;")
         
         self.detail_sent_date.setText(f"Sent: {email.sent_at.strftime('%Y-%m-%d %H:%M:%S')}")
         self.detail_body.setPlainText(email.body)
