@@ -245,169 +245,12 @@ class DashboardTab(QWidget):
     export_filtered_requested = pyqtSignal(dict) # Filter options for export
     
     def __init__(self):
-        super().__init__()
-        self.url_validator = URLValidator()
-        self.setup_ui()
-        self.connect_signals()
-        
-    def setup_ui(self):
-        """Setup the dashboard UI with proper scrolling"""
-        # Set the tab content class for styling
-        self.setProperty("class", "tab-content")
-        
-        # Create main layout
-        main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
-        
-        # Create scroll area
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        
-        # Create content widget
-        content_widget = QWidget()
-        content_widget.setProperty("class", "tab-content")
-        content_layout = QVBoxLayout(content_widget)
-        content_layout.setContentsMargins(20, 20, 20, 20)
-        content_layout.setSpacing(20)
-        
-        # Title
-        title_label = QLabel("Dashboard - Web Scraping Operations")
-        title_label.setProperty("class", "title")
-        content_layout.addWidget(title_label)
-        
-        # Remove decorative help section as requested
-        
-        # URL Input Section
-        url_section = self.create_url_input_section()
-        content_layout.addWidget(url_section)
-        
-        # Scraping Control Section
-        control_section = self.create_scraping_control_section()
-        content_layout.addWidget(control_section)
-        
-        # Results Section
-        results_section = self.create_results_section()
-        content_layout.addWidget(results_section)
-        
-        # Add stretch to push content to top
-        content_layout.addStretch()
-        
-        # Set content widget to scroll area
-        scroll_area.setWidget(content_widget)
-        
-        # Add scroll area to main layout
-        main_layout.addWidget(scroll_area)
-        
-    # Removed decorative help section as requested
-    
-    def create_url_input_section(self) -> QWidget:
-        """Create the URL input and management section"""
-        group_box = QGroupBox("URL Input & Management")
-        layout = QVBoxLayout(group_box)
-        
-        # Dynamic URL input - grows as URLs are added
-        input_layout = QVBoxLayout()
-        
-        # URL input label
-        input_label = QLabel("Enter URLs (one per line or separated by commas):")
-        input_label.setStyleSheet("font-weight: 500; margin-bottom: 5px;")
-        input_layout.addWidget(input_label)
-        
-        # Dynamic text area for URLs
-        self.url_input = QTextEdit()
-        self.url_input.setPlaceholderText(
-            "Enter website URLs here:\n"
-            "• One URL per line, or separate multiple URLs with commas\n"
-            "• Press Ctrl+Enter to add all URLs to the list\n"
-            "• Examples:\n"
-            "  https://example.com\n"
-            "  https://company.com, https://business.org"
-        )
-        self.url_input.setToolTip(
-            "Enter website URLs to scrape for email addresses.\n"
-            "• One URL per line or comma-separated\n"
-            "• Press Ctrl+Enter to add all URLs to list\n"
-            "• Use Ctrl+N to focus this field from anywhere\n"
-            "• Supports http:// and https:// URLs\n"
-            "• Text area will grow as you add more URLs"
-        )
-        self.url_input.setAccessibleName("Website URLs Input")
-        self.url_input.setAccessibleDescription("Enter website URLs to scrape for email addresses")
-        
-        # Set initial height and make it dynamic
-        self.url_input.setMinimumHeight(80)
-        self.url_input.setMaximumHeight(200)
-        
-        # Connect text changed signal to auto-resize
-        self.url_input.textChanged.connect(self.adjust_url_input_height)
-        
-        input_layout.addWidget(self.url_input)
-        
-        # Button layout
-        button_layout = QHBoxLayout()
-        
-        self.add_url_btn = QPushButton("Add URLs to List")
-        self.add_url_btn.setProperty("class", "primary-button")
-        self.add_url_btn.setToolTip(
-            "Add all URLs from the input area to the scraping list\n"
-            "Shortcut: Ctrl+Enter in the URL field"
-        )
-        self.add_url_btn.setAccessibleName("Add URLs Button")
-        self.add_url_btn.setAccessibleDescription("Add all entered URLs to the scraping list")
-        self.add_url_btn.clicked.connect(self.add_urls_from_input)
-        button_layout.addWidget(self.add_url_btn)
-        
-        # Add keyboard shortcut for Ctrl+Enter
-        from PyQt6.QtGui import QShortcut, QKeySequence
-        add_shortcut = QShortcut(QKeySequence("Ctrl+Return"), self.url_input)
-        add_shortcut.activated.connect(self.add_urls_from_input)
-        
-        button_layout.addStretch()
-        input_layout.addLayout(button_layout)
-        
-        layout.addLayout(input_layout)
-        
-        # CSV upload section
-        csv_layout = QHBoxLayout()
-        
-        self.upload_csv_btn = QPushButton("Upload CSV File")
-        self.upload_csv_btn.setProperty("class", "secondary-button")
-        self.upload_csv_btn.setToolTip("Upload a CSV file containing URLs to scrape (one URL per row)")
-        self.upload_csv_btn.clicked.connect(self.upload_csv_file)
-        csv_layout.addWidget(self.upload_csv_btn)
-        
-        self.clear_urls_btn = QPushButton("Clear All URLs")
-        self.clear_urls_btn.setProperty("class", "danger-button")
-        self.clear_urls_btn.setToolTip("Remove all URLs from the scraping list")
-        self.clear_urls_btn.clicked.connect(self.clear_all_urls)
-        csv_layout.addWidget(self.clear_urls_btn)
-        
-        csv_layout.addStretch()
-        layout.addLayout(csv_layout)
-        
-        # URL list table
-        self.url_list_widget = URLListWidget()
-        layout.addWidget(self.url_list_widget)
-        
-        # URL count label
-        self.url_count_label = QLabel("URLs: 0")
-        self.url_count_label.setProperty("class", "info-label")
-        layout.addWidget(self.url_count_label)
-        
-        return group_box
-    
-    def create_scraping_control_section(self) -> QWidget:
-        """Create the scraping control section"""
-        group_box = QGroupBox("Scraping Controls")
         layout = QVBoxLayout(group_box)
         
         # Control buttons
         button_layout = QHBoxLayout()
         
-        self.start_crawling_btn = QPushButton("🕷️ Start Smart Crawl (Recommended)")
+        self.start_crawling_btn = QPushButton("Start Smart Crawl (Recommended)")
         self.start_crawling_btn.setProperty("class", "primary-button")
         self.start_crawling_btn.setToolTip(
             "Smart crawl websites to discover and scrape internal pages (RECOMMENDED)\n"
@@ -422,7 +265,7 @@ class DashboardTab(QWidget):
         self.start_crawling_btn.clicked.connect(self.start_crawling)
         button_layout.addWidget(self.start_crawling_btn)
         
-        self.start_scraping_btn = QPushButton("🔍 Quick Scrape (Main Page Only)")
+        self.start_scraping_btn = QPushButton("Quick Scrape (Main Page Only)")
         self.start_scraping_btn.setProperty("class", "secondary-button")
         self.start_scraping_btn.setToolTip(
             "Quick scrape only the main page of each website\n"
@@ -436,7 +279,7 @@ class DashboardTab(QWidget):
         self.start_scraping_btn.clicked.connect(self.start_scraping)
         button_layout.addWidget(self.start_scraping_btn)
         
-        self.stop_scraping_btn = QPushButton("⏹️ Stop Operation")
+        self.stop_scraping_btn = QPushButton("Stop Operation")
         self.stop_scraping_btn.setProperty("class", "danger-button")
         self.stop_scraping_btn.setToolTip("Stop the current scraping or crawling operation (Esc)")
         self.stop_scraping_btn.setEnabled(False)
