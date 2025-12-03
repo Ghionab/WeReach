@@ -70,22 +70,22 @@ class MainWindow(QMainWindow):
         # Dashboard tab - import the actual dashboard tab
         from ui.dashboard_tab import DashboardTab
         self.dashboard_tab = DashboardTab()
-        self.tab_widget.addTab(self.dashboard_tab, "🏠 Dashboard")
+        self.tab_widget.addTab(self.dashboard_tab, "Dashboard")
         
         # Email tab - import the actual email tab
         from ui.email_tab import EmailTab
         self.email_tab = EmailTab()
-        self.tab_widget.addTab(self.email_tab, "✉️ Email")
+        self.tab_widget.addTab(self.email_tab, "Email")
         
         # History tab - import the actual history tab
         from ui.history_tab import HistoryTab
         self.history_tab = HistoryTab()
-        self.tab_widget.addTab(self.history_tab, "📋 History")
+        self.tab_widget.addTab(self.history_tab, "History")
         
         # Settings tab - import the actual settings tab
         from ui.settings_tab import SettingsTab
         self.settings_tab = SettingsTab()
-        self.tab_widget.addTab(self.settings_tab, "⚙️ Settings")
+        self.tab_widget.addTab(self.settings_tab, "Settings")
         
     def setup_menu_bar(self):
         """Setup the application menu bar"""
@@ -428,8 +428,8 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Connection Test", "All connections are working properly!")
         else:
             message = "Connection test results:\n"
-            message += f"• Gemini AI: {'✓ Connected' if gemini_ok else '✗ Failed'}\n"
-            message += f"• SMTP: {'✓ Connected' if smtp_ok else '✗ Failed'}\n\n"
+            message += f"• Gemini AI: {'Connected' if gemini_ok else 'Failed'}\n"
+            message += f"• SMTP: {'Connected' if smtp_ok else 'Failed'}\n\n"
             message += "Check your settings in the Settings tab."
             QMessageBox.warning(self, "Connection Test", message)
         
