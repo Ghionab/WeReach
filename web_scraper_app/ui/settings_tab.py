@@ -121,13 +121,13 @@ class SettingsTab(QWidget):
         
         # Show/Hide API key button
         self.show_api_key_btn = QPushButton("Show")
-        self.show_api_key_btn.setProperty("class", "secondary")
+        self.show_api_key_btn.setProperty("class", "secondary-button")
         self.show_api_key_btn.setMaximumWidth(60)
         api_layout.addWidget(self.show_api_key_btn, 0, 2)
         
         # Test connection button
         self.test_gemini_btn = QPushButton("Test Connection")
-        self.test_gemini_btn.setProperty("class", "secondary")
+        self.test_gemini_btn.setProperty("class", "secondary-button")
         api_layout.addWidget(self.test_gemini_btn, 1, 0)
         
         # Connection status
@@ -147,7 +147,7 @@ class SettingsTab(QWidget):
         
         # Clear API key button
         self.clear_api_btn = QPushButton("Clear API Key")
-        self.clear_api_btn.setProperty("class", "danger")
+        self.clear_api_btn.setProperty("class", "danger-button")
         api_layout.addWidget(self.clear_api_btn, 2, 1)
         
         parent_layout.addWidget(api_group)
@@ -186,7 +186,7 @@ class SettingsTab(QWidget):
         
         # Show/Hide password button
         self.show_password_btn = QPushButton("Show")
-        self.show_password_btn.setProperty("class", "secondary")
+        self.show_password_btn.setProperty("class", "secondary-button")
         self.show_password_btn.setMaximumWidth(60)
         smtp_layout.addWidget(self.show_password_btn, 2, 3)
         
@@ -197,7 +197,7 @@ class SettingsTab(QWidget):
         
         # Test SMTP button
         self.test_smtp_btn = QPushButton("Test SMTP")
-        self.test_smtp_btn.setProperty("class", "secondary")
+        self.test_smtp_btn.setProperty("class", "secondary-button")
         smtp_layout.addWidget(self.test_smtp_btn, 4, 0)
         
         # SMTP status
@@ -217,7 +217,7 @@ class SettingsTab(QWidget):
         
         # Clear SMTP button
         self.clear_smtp_btn = QPushButton("Clear SMTP Config")
-        self.clear_smtp_btn.setProperty("class", "danger")
+        self.clear_smtp_btn.setProperty("class", "danger-button")
         smtp_layout.addWidget(self.clear_smtp_btn, 5, 1)
         
         parent_layout.addWidget(smtp_group)
@@ -241,12 +241,12 @@ class SettingsTab(QWidget):
         
         # Export configuration
         self.export_config_btn = QPushButton("Export Configuration")
-        self.export_config_btn.setProperty("class", "secondary")
+        self.export_config_btn.setProperty("class", "secondary-button")
         prefs_layout.addWidget(self.export_config_btn, 2, 0)
         
         # Import configuration
         self.import_config_btn = QPushButton("Import Configuration")
-        self.import_config_btn.setProperty("class", "secondary")
+        self.import_config_btn.setProperty("class", "secondary-button")
         prefs_layout.addWidget(self.import_config_btn, 2, 1)
         
         # Validate all configurations
@@ -255,7 +255,7 @@ class SettingsTab(QWidget):
         
         # Clear all configurations
         self.clear_all_btn = QPushButton("Clear All Settings")
-        self.clear_all_btn.setProperty("class", "danger")
+        self.clear_all_btn.setProperty("class", "danger-button")
         prefs_layout.addWidget(self.clear_all_btn, 3, 1)
         
         parent_layout.addWidget(prefs_group)
@@ -266,19 +266,19 @@ class SettingsTab(QWidget):
         
         # Refresh button
         self.refresh_btn = QPushButton("Refresh Settings")
-        self.refresh_btn.setProperty("class", "secondary")
+        self.refresh_btn.setProperty("class", "secondary-button")
         button_layout.addWidget(self.refresh_btn)
         
         button_layout.addStretch()
         
         # Gmail setup button
         self.gmail_setup_btn = QPushButton("Gmail Setup Guide")
-        self.gmail_setup_btn.setProperty("class", "secondary")
+        self.gmail_setup_btn.setProperty("class", "secondary-button")
         button_layout.addWidget(self.gmail_setup_btn)
         
         # Help button
         self.help_btn = QPushButton("Help")
-        self.help_btn.setProperty("class", "secondary")
+        self.help_btn.setProperty("class", "secondary-button")
         button_layout.addWidget(self.help_btn)
         
         parent_layout.addLayout(button_layout)
@@ -315,11 +315,11 @@ class SettingsTab(QWidget):
             api_key = self.config_manager.get_gemini_api_key()
             if api_key:
                 self.api_key_input.setText("*" * 20)  # Show masked key
-                self.gemini_status_label.setText("✓ API key configured")
+                self.gemini_status_label.setText("API key configured")
                 self.gemini_status_label.setProperty("class", "success")
             else:
                 self.api_key_input.clear()
-                self.gemini_status_label.setText("✗ No API key")
+                self.gemini_status_label.setText("No API key")
                 self.gemini_status_label.setProperty("class", "error")
             
             # Load SMTP configuration
@@ -330,7 +330,7 @@ class SettingsTab(QWidget):
                 self.smtp_email_input.setText(smtp_config.email)
                 self.smtp_password_input.setText("*" * 12)  # Show masked password
                 self.use_tls_checkbox.setChecked(smtp_config.use_tls)
-                self.smtp_status_label.setText("✓ SMTP configured")
+                self.smtp_status_label.setText("SMTP configured")
                 self.smtp_status_label.setProperty("class", "success")
             else:
                 self.smtp_server_input.clear()
@@ -338,7 +338,7 @@ class SettingsTab(QWidget):
                 self.smtp_email_input.clear()
                 self.smtp_password_input.clear()
                 self.use_tls_checkbox.setChecked(True)
-                self.smtp_status_label.setText("✗ Not configured")
+                self.smtp_status_label.setText("Not configured")
                 self.smtp_status_label.setProperty("class", "error")
             
             # Update configuration status
@@ -358,13 +358,13 @@ class SettingsTab(QWidget):
         status = self.config_manager.get_configuration_status()
         
         if status["fully_configured"]:
-            self.config_status_label.setText("✓ Fully configured")
+            self.config_status_label.setText("Fully configured")
             self.config_status_label.setProperty("class", "success")
         elif status["gemini_configured"] or status["smtp_configured"]:
-            self.config_status_label.setText("⚠ Partially configured")
-            self.config_status_label.setProperty("class", "error")
+            self.config_status_label.setText("Partially configured")
+            self.config_status_label.setProperty("class", "warning")
         else:
-            self.config_status_label.setText("✗ Not configured")
+            self.config_status_label.setText("Not configured")
             self.config_status_label.setProperty("class", "error")
         
         # Refresh style
@@ -416,11 +416,11 @@ class SettingsTab(QWidget):
             self.gemini_progress.setVisible(False)
             
             if success:
-                self.gemini_status_label.setText(f"✓ {message}")
+                self.gemini_status_label.setText(f"{message}")
                 self.gemini_status_label.setProperty("class", "success")
                 QMessageBox.information(self, "Connection Test", f"Gemini API: {message}")
             else:
-                self.gemini_status_label.setText(f"✗ {message}")
+                self.gemini_status_label.setText(f"{message}")
                 self.gemini_status_label.setProperty("class", "error")
                 QMessageBox.warning(self, "Connection Test Failed", f"Gemini API: {message}")
             
@@ -443,7 +443,7 @@ class SettingsTab(QWidget):
         try:
             self.config_manager.set_gemini_api_key(api_key)
             self.api_key_input.setText("*" * 20)  # Mask the key
-            self.gemini_status_label.setText("✓ API key saved")
+            self.gemini_status_label.setText("API key saved")
             self.gemini_status_label.setProperty("class", "success")
             
             # Refresh style
@@ -471,7 +471,7 @@ class SettingsTab(QWidget):
             try:
                 self.config_manager.clear_gemini_config()
                 self.api_key_input.clear()
-                self.gemini_status_label.setText("✗ No API key")
+                self.gemini_status_label.setText("No API key")
                 self.gemini_status_label.setProperty("class", "error")
                 
                 # Refresh style
@@ -541,11 +541,11 @@ class SettingsTab(QWidget):
             self.smtp_progress.setVisible(False)
             
             if success:
-                self.smtp_status_label.setText(f"✓ {message}")
+                self.smtp_status_label.setText(f"{message}")
                 self.smtp_status_label.setProperty("class", "success")
                 QMessageBox.information(self, "Connection Test", f"SMTP: {message}")
             else:
-                self.smtp_status_label.setText(f"✗ {message}")
+                self.smtp_status_label.setText(f"{message}")
                 self.smtp_status_label.setProperty("class", "error")
                 QMessageBox.warning(self, "Connection Test Failed", f"SMTP: {message}")
             
@@ -582,7 +582,7 @@ class SettingsTab(QWidget):
         try:
             self.config_manager.set_smtp_config(smtp_config)
             self.smtp_password_input.setText("*" * 12)  # Mask the password
-            self.smtp_status_label.setText("✓ SMTP configured")
+            self.smtp_status_label.setText("SMTP configured")
             self.smtp_status_label.setProperty("class", "success")
             
             # Refresh style
@@ -614,7 +614,7 @@ class SettingsTab(QWidget):
                 self.smtp_email_input.clear()
                 self.smtp_password_input.clear()
                 self.use_tls_checkbox.setChecked(True)
-                self.smtp_status_label.setText("✗ Not configured")
+                self.smtp_status_label.setText("Not configured")
                 self.smtp_status_label.setProperty("class", "error")
                 
                 # Refresh style
@@ -713,8 +713,8 @@ class SettingsTab(QWidget):
             gemini_success, gemini_msg = results.get("gemini", (False, "Not tested"))
             smtp_success, smtp_msg = results.get("smtp", (False, "Not tested"))
             
-            message += f"Gemini AI: {'✓' if gemini_success else '✗'} {gemini_msg}\n"
-            message += f"SMTP: {'✓' if smtp_success else '✗'} {smtp_msg}\n\n"
+            message += f"Gemini AI: {'OK' if gemini_success else 'Failed'} - {gemini_msg}\n"
+            message += f"SMTP: {'OK' if smtp_success else 'Failed'} - {smtp_msg}\n\n"
             
             if gemini_success and smtp_success:
                 message += "All configurations are working properly!"
