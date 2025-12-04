@@ -12,11 +12,18 @@ import asyncio
 from models.email_model import EmailModel, SentEmailModel, SMTPConfig, EmailContent
 from core.database import DatabaseManager
 from core.scraper import WebScraper
+# Import WebCrawler
+try:
+    from .web_crawler import WebCrawler
+    print("WebCrawler imported successfully in app_controller")
+except ImportError as e:
+    print(f"WebCrawler import failed: {e}")
+    WebCrawler = None
 from core.ai_client import GeminiAIClient
 from core.email_sender import EmailSender
 from core.config_manager import ConfigManager
 from core.export_manager import ExportManager
-from utils.threading_utils import WorkerThread, ScrapingWorker, EmailGenerationWorker, EmailSendingWorker
+from utils.threading_utils import WorkerThread, ScrapingWorker, EmailGenerationWorker, EmailSendingWorker, CrawlingWorker
 from utils.health_monitor import get_health_monitor, setup_default_health_checks
 from utils.retry_manager import get_retry_manager, get_fallback_manager
 from utils.state_manager import get_state_manager
@@ -39,6 +46,11 @@ class ApplicationController(QObject):
     scraping_progress = pyqtSignal(int, str)  # progress, current_url
     email_found = pyqtSignal(str, str, str)  # email, source_website, extracted_at
     
+    # Crawling signals
+    crawling_started = pyqtSignal()
+    crawling_finished = pyqtSignal(list)  # List of EmailModel
+    crawling_progress = pyqtSignal(int, str)  # progress, current_url
+    
     # Email generation signals
     email_generation_started = pyqtSignal()
     email_generation_finished = pyqtSignal(list)  # List of EmailContent
@@ -59,6 +71,9 @@ class ApplicationController(QObject):
     
     def __init__(self):
         super().__init__()
+        
+        # Initialize logger
+        self.logger = logging.getLogger(__name__)
         
         # Initialize core modules
         self.db_manager = DatabaseManager()
@@ -117,8 +132,15 @@ class ApplicationController(QObject):
             if smtp_config:
                 self.email_sender = EmailSender(smtp_config, self.db_manager)
                 
-            # Initialize web scraper
+            # Initialize web scraper and crawler
             self.web_scraper = WebScraper()
+            
+            # Initialize web crawler if available
+            if WebCrawler:
+                self.web_crawler = WebCrawler()
+            else:
+                self.web_crawler = None
+                self.logger.warning("WebCrawler not available - deep crawling disabled")
             
             # Setup health monitoring for initialized components
             self._setup_health_monitoring()
@@ -359,6 +381,104 @@ class ApplicationController(QObject):
                 self.scraping_thread.quit()
                 self.scraping_thread.wait()
                 self.scraping_thread = None
+    
+    # Web crawling methods
+    def start_crawling(self, urls: List[str]):
+        """Start deep web crawling operation"""
+        if not self.web_crawler:
+            self.error_occurred.emit("Deep crawling not available - WebCrawler not initialized")
+            return
+            
+        if self.is_scraping:  # Use same flag to prevent concurrent operations
+            self.error_occurred.emit("Crawling already in progress")
+            return
+            
+        if not urls:
+            self.error_occurred.emit("No URLs provided for crawling")
+            return
+        
+        self.is_scraping = True  # Use same flag
+        self.crawling_started.emit()
+        
+        # Create and start crawling worker
+        self.crawling_worker = CrawlingWorker(urls, self.web_crawler)
+        self.crawling_thread = QThread()
+        
+        # Move worker to thread
+        self.crawling_worker.moveToThread(self.crawling_thread)
+        
+        # Connect signals
+        self.crawling_worker.finished.connect(self._on_crawling_finished)
+        self.crawling_worker.progress.connect(self._on_crawling_progress)
+        self.crawling_worker.error.connect(self._on_crawling_error)
+        self.crawling_worker.email_found.connect(self._on_crawling_email_found)
+        
+        # Start thread
+        self.crawling_thread.started.connect(self.crawling_worker.run)
+        self.crawling_thread.start()
+        
+        self.status_update.emit(f"Started deep crawling {len(urls)} websites")
+    
+    def _on_crawling_finished(self, emails: List[EmailModel]):
+        """Handle crawling completion"""
+        self.is_scraping = False  # Use same flag
+        
+        # Save emails to database
+        try:
+            saved_count = self.db_manager.save_scraped_emails(emails)
+            self.logger.info(f"Saved {saved_count} new emails out of {len(emails)} total")
+            
+            # Update data signals
+            self.data_updated.emit("scraped_emails")
+            
+            # Emit completion signal
+            self.crawling_finished.emit(emails)
+            self.status_update.emit(f"Crawling completed. Found {len(emails)} emails")
+            
+            # Update data signals
+            self.data_updated.emit("scraped_emails")
+            
+        except Exception as e:
+            self.error_occurred.emit(f"Failed to save crawled emails: {str(e)}")
+        
+        # Clean up thread
+        if self.crawling_thread:
+            self.crawling_thread.quit()
+            self.crawling_thread.wait()
+            self.crawling_thread = None
+    
+    def _on_crawling_progress(self, progress_percent: int, status_message: str):
+        """Handle crawling progress updates"""
+        self.crawling_progress.emit(progress_percent, status_message)
+        self.status_update.emit(status_message)
+    
+    def _on_crawling_error(self, error_message: str):
+        """Handle crawling error"""
+        self.is_scraping = False  # Use same flag
+        self.error_occurred.emit(f"Crawling failed: {error_message}")
+        
+        # Clean up thread
+        if self.crawling_thread:
+            self.crawling_thread.quit()
+            self.crawling_thread.wait()
+            self.crawling_thread = None
+    
+    def _on_crawling_email_found(self, email: str, source_website: str, extracted_at: str):
+        """Handle email found during crawling"""
+        self.email_found.emit(email, source_website, extracted_at)
+    
+    def stop_crawling(self):
+        """Stop the current crawling operation"""
+        if self.is_scraping and hasattr(self, 'crawling_worker'):
+            self.crawling_worker.cancel()
+            self.is_scraping = False
+            self.status_update.emit("Crawling stopped by user")
+            
+            # Clean up thread
+            if self.crawling_thread:
+                self.crawling_thread.quit()
+                self.crawling_thread.wait()
+                self.crawling_thread = None
     
     # Email generation methods
     def generate_emails(self, websites: List[str]):
