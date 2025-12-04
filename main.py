@@ -101,11 +101,11 @@ def main():
     # Apply performance optimizations early
     setup_performance_optimizations(app)
     
-    # Show splash screen for better user experience
+    # Show modern splash screen for better user experience
     splash = None
     try:
-        from ui.splash_screen import SplashScreen
-        splash = SplashScreen()
+        from ui.splash_screen import ModernSplashScreen
+        splash = ModernSplashScreen()
         splash.show()
         app.processEvents()
         splash.update_progress(10, "Applying performance optimizations...")
