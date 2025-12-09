@@ -263,6 +263,54 @@ class DatabaseManager:
             self.logger.error(f"Failed to retrieve email history: {e}")
             raise DatabaseException(f"Failed to retrieve email history: {e}")
     
+    def clear_all_data(self):
+        """Clear all data from the database (fresh start)."""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                # Count records before deletion
+                cursor.execute("SELECT COUNT(*) FROM scraped_emails")
+                scraped_count = cursor.fetchone()[0]
+                
+                cursor.execute("SELECT COUNT(*) FROM sent_emails")
+                sent_count = cursor.fetchone()[0]
+                
+                # Clear all tables
+                cursor.execute("DELETE FROM scraped_emails")
+                cursor.execute("DELETE FROM sent_emails")
+                
+                # Reset auto-increment counters
+                cursor.execute("DELETE FROM sqlite_sequence WHERE name IN ('scraped_emails', 'sent_emails')")
+                
+                conn.commit()
+                self.logger.info(f"All database data cleared successfully - {scraped_count} scraped, {sent_count} sent")
+                
+                return {
+                    'scraped_emails_deleted': scraped_count,
+                    'sent_emails_deleted': sent_count
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Failed to clear database: {e}")
+            raise DatabaseException(f"Failed to clear database: {e}")
+    
+    def clear_scraped_emails(self):
+        """Clear only scraped emails data."""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                
+                cursor.execute("DELETE FROM scraped_emails")
+                cursor.execute("DELETE FROM sqlite_sequence WHERE name = 'scraped_emails'")
+                
+                conn.commit()
+                self.logger.info("Scraped emails cleared successfully")
+                
+        except Exception as e:
+            self.logger.error(f"Failed to clear scraped emails: {e}")
+            raise DatabaseException(f"Failed to clear scraped emails: {e}")
+    
     def search_sent_emails(self, search_term: str, status: Optional[str] = None) -> List[SentEmailModel]:
         """
         Search sent emails by recipient email or subject.
